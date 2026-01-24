@@ -4,6 +4,7 @@ import com.asistencia.model.Asistencia;
 import com.asistencia.services.AsistenciaService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -25,4 +26,18 @@ public class AsistenciaController {
         return service.listar();
     }
 
+    @GetMapping("/fecha/{fecha}")
+    public List<Asistencia> porFecha(@PathVariable String fecha) {
+        return service.listarPorFecha(LocalDate.parse(fecha));
+    }
+
+    @GetMapping("/estudiante/{id}")
+    public List<Asistencia> porEstudiante(@PathVariable Long id) {
+        return service.listarPorEstudiante(id);
+    }
+
+    @GetMapping("/grado/{grado}")
+    public List<Asistencia> porGrado(@PathVariable String grado) {
+        return service.listarPorGrado(grado);
+    }
 }

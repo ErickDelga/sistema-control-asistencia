@@ -1,7 +1,9 @@
 package com.asistencia.controller;
 
 import com.asistencia.model.Estudiante;
+import com.asistencia.model.Usuario;
 import com.asistencia.services.EstudianteService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +31,14 @@ public class EstudianteController {
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
         service.eliminar(id);
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<Estudiante> actualizar(
+            @PathVariable Long id,
+            @RequestBody Estudiante estudiante) {
+
+        Estudiante actualizado = service.actualizar(id, estudiante);
+        return ResponseEntity.ok(actualizado);
     }
 
 }

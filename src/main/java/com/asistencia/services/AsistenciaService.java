@@ -25,4 +25,15 @@ public class AsistenciaService {
     public List<Asistencia> listar() {
         return repo.findAll();
     }
+    public List<Asistencia> listarPorFecha(LocalDate fecha) {
+        return repo.findByFecha(fecha);
+    }
+
+    public List<Asistencia> listarPorEstudiante(Long estudianteId) {
+        return repo.findByEstudianteId(estudianteId);
+    }
+
+    public List<Asistencia> listarPorGrado(String grupo) {
+        return repo.findByEstudianteGrado(grupo);
+    }
 }

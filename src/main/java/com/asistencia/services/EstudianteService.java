@@ -14,6 +14,16 @@ public class EstudianteService {
         this.repo = repo;
     }
 
+    public Estudiante actualizar(Long id, Estudiante datos) {
+        Estudiante existente = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Estudiante no encontrado"));
+
+        existente.setNombre(datos.getNombre());
+        existente.setGrado(datos.getGrado());
+
+        return repo.save(existente);
+    }
+
     public Estudiante guardar(Estudiante e) {
         return repo.save(e);
     }
