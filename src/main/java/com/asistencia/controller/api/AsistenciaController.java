@@ -1,5 +1,6 @@
-package com.asistencia.controller;
+package com.asistencia.controller.api;
 
+import com.asistencia.dto.AsistenciaRequest;
 import com.asistencia.model.Asistencia;
 import com.asistencia.services.AsistenciaService;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +18,15 @@ public class AsistenciaController {
         this.service = service;
     }
 
+//    @PostMapping
+//    public Asistencia registrar(@RequestBody Asistencia a) {
+//        return service.registrar(a);
+//    }
     @PostMapping
-    public Asistencia registrar(@RequestBody Asistencia a) {
-        return service.registrar(a);
+    public Asistencia registrar(@RequestBody AsistenciaRequest request) {
+        return service.registrar(request);
     }
+
     @GetMapping
     public List<Asistencia> listar() {
         return service.listar();
@@ -37,7 +43,7 @@ public class AsistenciaController {
     }
 
     @GetMapping("/grado/{grado}")
-    public List<Asistencia> porGrado(@PathVariable String grado) {
-        return service.listarPorGrado(grado);
+    public List<Asistencia> porGrado(@PathVariable String grupo) {
+        return service.listarPorGrado(grupo);
     }
 }

@@ -1,4 +1,4 @@
-package com.asistencia.controller;
+package com.asistencia.controller.api;
 
 import com.asistencia.model.Usuario;
 import com.asistencia.services.UsuarioService;

@@ -1,7 +1,10 @@
 package com.asistencia.services;
 
+import com.asistencia.dto.AsistenciaRequest;
 import com.asistencia.model.Asistencia;
+import com.asistencia.model.Estudiante;
 import com.asistencia.repository.AsistenciaRepository;
+import com.asistencia.repository.EstudianteRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -10,30 +13,50 @@ import java.util.List;
 @Service
 public class AsistenciaService {
 
-    private final AsistenciaRepository repo;
+    private final AsistenciaRepository repoAsistencia;
+    private final EstudianteRepository repoEstudiante;
 
-    public AsistenciaService(AsistenciaRepository repo){
-        this.repo = repo;
+    public AsistenciaService(AsistenciaRepository repoAsistencia,
+                             EstudianteRepository repoEstudiante){
+        this.repoAsistencia = repoAsistencia;
+        this.repoEstudiante = repoEstudiante;
     }
 
-    public Asistencia registrar(Asistencia a) {
-        if (a.getFecha().isAfter(LocalDate.now())) {
-            throw new RuntimeException("La fecha no puede ser futura");
-        }
-        return repo.save(a);
+//    public Asistencia registrar(Asistencia a) {
+//        if (a.getFecha().isAfter(LocalDate.now())) {
+//            throw new RuntimeException("La fecha no puede ser futura");
+//        }
+//        return repo.save(a);
+//    }
+
+    public Asistencia registrar(AsistenciaRequest request) {
+
+        Estudiante estudiante = repoEstudiante.findById(request.getEstudianteId())
+                .orElseThrow(() -> new RuntimeException("Estudiante no encontrado"));
+
+        Asistencia asistencia = new Asistencia();
+        asistencia.setFecha(LocalDate.now());
+        asistencia.setEstado(request.getEstado());
+        asistencia.setEstudiante(estudiante);
+
+        return repoAsistencia.save(asistencia);
     }
+
     public List<Asistencia> listar() {
-        return repo.findAll();
+        return repoAsistencia.findAll();
     }
     public List<Asistencia> listarPorFecha(LocalDate fecha) {
-        return repo.findByFecha(fecha);
+        return repoAsistencia.findByFecha(fecha);
     }
 
     public List<Asistencia> listarPorEstudiante(Long estudianteId) {
-        return repo.findByEstudianteId(estudianteId);
+        return repoAsistencia.findByEstudianteId(estudianteId);
     }
 
     public List<Asistencia> listarPorGrado(String grupo) {
-        return repo.findByEstudianteGrado(grupo);
+        return repoAsistencia.findByEstudianteGrado(grupo);
+    }
+    public List<Asistencia> listarTodas() {
+        return repoAsistencia.findAll();
     }
 }

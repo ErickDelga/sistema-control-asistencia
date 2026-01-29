@@ -1,4 +1,4 @@
-package com.asistencia.controller;
+package com.asistencia.controller.api;
 
 import org.springframework.web.bind.annotation.*;
 

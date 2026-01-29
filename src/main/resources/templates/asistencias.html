@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Asistencias</title>
+</head>
+<body>
+
+<h2>Registro de Asistencias</h2>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Estudiante</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+    </tr>
+
+    <tr th:each="asistencia : ${asistencias}">
+        <td th:text="${asistencia.id}"></td>
+        <td th:text="${asistencia.estudiante.nombre}"></td>
+        <td th:text="${asistencia.fecha}"></td>
+        <td th:text="${asistencia.estado}"></td>
+    </tr>
+</table>
+
+<br>
+<a th:href="@{/menu}">Volver al menú</a>
+
+</body>
+</html>>

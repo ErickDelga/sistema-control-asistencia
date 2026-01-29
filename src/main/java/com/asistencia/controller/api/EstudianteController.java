@@ -1,7 +1,6 @@
-package com.asistencia.controller;
+package com.asistencia.controller.api;
 
 import com.asistencia.model.Estudiante;
-import com.asistencia.model.Usuario;
 import com.asistencia.services.EstudianteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +19,7 @@ public class EstudianteController {
 
     @PostMapping
     public Estudiante crear(@RequestBody Estudiante e) {
+        System.out.println("LLEGO ESTUDIANTE: " + e);
         return service.guardar(e);
     }
 

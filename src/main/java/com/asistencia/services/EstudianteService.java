@@ -31,10 +31,14 @@ public class EstudianteService {
     public List<Estudiante> listar() {
         return repo.findAll();
     }
+
     public void eliminar(Long id) {
         if (!repo.existsById(id)) {
             throw new RuntimeException("El estudiante no existe");
         }
         repo.deleteById(id);
+    }
+    public List<Estudiante> listarTodos() {
+        return repo.findAll();
     }
 }
