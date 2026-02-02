@@ -5,6 +5,17 @@
 </head>
 <body>
 
+<h3>Nuevo Estudiante</h3>
+
+<form id="formEstudiante" th:action="@{estudiantes/guardar}" method="post" onsubmit="return validarEstudiante()">
+
+    <input type="text" name="nombre" id="nombre" placeholder="Nombre" required>
+    <input type="text" name="grado" id="grado" placeholder="Grado" required>
+
+    <button type="submit">Guardar</button>
+
+</form>
+
 <h2>Lista de Estudiantes</h2>
 
 <table border="1">
@@ -21,10 +32,13 @@
     </tr>
 </table>
 
+<p id="error" style="color:red;"></p>
+
 <br>
 <!--<a th:href="@{/menu}">Volver al menú</a>-->
 
 <a th:href="@{/}">Volver al menú</a>
 
+<!--<script src="/js/estudiantes.js"></script>-->
 </body>
 </html>

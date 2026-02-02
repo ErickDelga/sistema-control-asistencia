@@ -2,6 +2,7 @@ package com.asistencia.services;
 
 import com.asistencia.dto.AsistenciaRequest;
 import com.asistencia.model.Asistencia;
+import com.asistencia.model.EstadoAsistencia;
 import com.asistencia.model.Estudiante;
 import com.asistencia.repository.AsistenciaRepository;
 import com.asistencia.repository.EstudianteRepository;
@@ -58,5 +59,17 @@ public class AsistenciaService {
     }
     public List<Asistencia> listarTodas() {
         return repoAsistencia.findAll();
+    }
+    public Asistencia registrar(Long estudianteId, EstadoAsistencia estado){
+
+        Estudiante estudiante = repoEstudiante.findById(estudianteId)
+                .orElseThrow(() -> new RuntimeException("Estudiante no encontrado"));
+
+        Asistencia a = new Asistencia();
+        a.setFecha(LocalDate.now());
+        a.setEstado(estado);
+        a.setEstudiante(estudiante);
+
+        return repoAsistencia.save(a);
     }
 }

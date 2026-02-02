@@ -5,6 +5,27 @@
 </head>
 <body>
 
+<h3>Registrar Asistencia</h3>
+
+<form id="formAsistencia" th:action="@{/asistencias/guardar}" method="post">
+
+    <select name="estudianteId" id="estudianteId">
+        <option th:each="e : ${estudiantes}"
+                th:value="${e.id}"
+                th:text="${e.nombre}">
+        </option>
+    </select>
+
+    <select name="estado" id="estado">
+        <option value="PRESENTE">Presente</option>
+        <option value="AUSENTE">Ausente</option>
+        <option value="TARDE">Tarde</option>
+    </select>
+
+    <button type="submit">Guardar</button>
+
+</form>
+
 <h2>Registro de Asistencias</h2>
 
 <table border="1">
@@ -25,6 +46,8 @@
 
 <br>
 <a th:href="@{/menu}">Volver al menú</a>
+
+<script src="/js/asistencias.js"></script>
 
 </body>
 </html>>
