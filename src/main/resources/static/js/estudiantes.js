@@ -1,17 +1,40 @@
-document.getElementById("formEstudiante")
-.addEventListener("submit", function(e){
+document.addEventListener("DOMContentLoaded", function () {
 
-    let n = document.getElementById("nombre").value.trim();
-    let g = document.getElementById("grado").value.trim();
+    const form = document.getElementById("formEstudiante");
 
-    if(n.length < 3){
-        alert("Nombre muy corto");
-        e.preventDefault();
-    }
+    if (!form) return;
 
-    if(g.length < 2){
-        alert("Grado inválido");
-        e.preventDefault();
-    }
+    form.addEventListener("submit", function (e) {
+
+        let nombre = document.getElementById("nombre").value.trim();
+        let grado = document.getElementById("grado").value.trim();
+
+        let errores = [];
+
+        // ✅ Validaciones
+        if (nombre.length < 3) {
+            errores.push("Nombre debe tener al menos 3 caracteres");
+        }
+
+        if (grado.length < 2) {
+            errores.push("Grado inválido");
+        }
+
+        // ✅ Si hay errores → detener envío
+        if (errores.length > 0) {
+            e.preventDefault();
+            alert(errores.join("\n"));
+            return;
+        }
+
+        // ✅ UX Semana 12 → feedback visual
+        const btn = form.querySelector("button");
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = "Guardando...";
+        }
+
+    });
 
 });

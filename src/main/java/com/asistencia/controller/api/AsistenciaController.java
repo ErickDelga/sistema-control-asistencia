@@ -18,10 +18,6 @@ public class AsistenciaController {
         this.service = service;
     }
 
-//    @PostMapping
-//    public Asistencia registrar(@RequestBody Asistencia a) {
-//        return service.registrar(a);
-//    }
     @PostMapping
     public Asistencia registrar(@RequestBody AsistenciaRequest request) {
         return service.registrar(request);
