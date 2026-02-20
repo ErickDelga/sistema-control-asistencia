@@ -13,25 +13,28 @@
 
 <div class="container mt-4">
 
+  <!-- FORMULARIO -->
   <div class="card shadow mb-4">
     <div class="card-body">
-      <h5>Nuevo Usuario</h5>
+      <h5 th:text="${usuario.id != null} ? 'Editar Usuario' : 'Nuevo Usuario'"></h5>
 
-      <form th:action="@{/usuarios/guardar}" method="post">
+      <form th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post">
+
+        <input type="hidden" th:field="*{id}"/>
 
         <div class="mb-3">
           <label>Usuario</label>
-          <input name="username" class="form-control" required>
+          <input th:field="*{username}" class="form-control" required>
         </div>
 
         <div class="mb-3">
           <label>Password</label>
-          <input name="password" type="password" class="form-control" required>
+          <input th:field="*{password}" type="password" class="form-control" required>
         </div>
 
         <div class="mb-3">
           <label>Rol</label>
-          <select name="rol" class="form-select">
+          <select th:field="*{rol}" class="form-select">
             <option th:each="r : ${roles}"
                     th:value="${r}"
                     th:text="${r}">
@@ -44,23 +47,39 @@
     </div>
   </div>
 
+  <!-- LISTA -->
   <div class="card shadow">
     <div class="card-body">
 
       <h5>Lista de Usuarios</h5>
 
       <table class="table table-striped">
+        <thead>
         <tr>
           <th>ID</th>
           <th>Username</th>
           <th>Rol</th>
+          <th>Acciones</th>
         </tr>
+        </thead>
 
+        <tbody>
         <tr th:each="u : ${usuarios}">
           <td th:text="${u.id}"></td>
           <td th:text="${u.username}"></td>
           <td th:text="${u.rol}"></td>
+          <td>
+            <a th:href="@{/usuarios/editar/{id}(id=${u.id})}"
+               class="btn btn-warning btn-sm">Editar</a>
+
+            <a th:href="@{/usuarios/eliminar/{id}(id=${u.id})}"
+               class="btn btn-danger btn-sm"
+               onclick="return confirm('¿Seguro que deseas eliminar este usuario?')">
+              Eliminar
+            </a>
+          </td>
         </tr>
+        </tbody>
 
       </table>
 
@@ -68,5 +87,6 @@
   </div>
 
 </div>
+
 </body>
 </html>

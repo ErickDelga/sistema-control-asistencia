@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Estudiantes | Control de Asistencia</title>
     <meta charset="UTF-8">
@@ -86,6 +87,15 @@
                         <td th:text="${estudiante.id}"></td>
                         <td th:text="${estudiante.nombre}"></td>
                         <td th:text="${estudiante.grado}"></td>
+
+                        <td sec:authorize="hasRole('ADMIN')">
+
+                            <a th:href="@{/estudiantes/eliminar/{id}(id=${estudiante.id})}"
+                               class="btn btn-danger btn-sm">
+                                Eliminar
+                            </a>
+
+                        </td>
                     </tr>
                     </tbody>
 

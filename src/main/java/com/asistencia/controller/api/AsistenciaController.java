@@ -20,7 +20,10 @@ public class AsistenciaController {
 
     @PostMapping
     public Asistencia registrar(@RequestBody AsistenciaRequest request) {
-        return service.registrar(request);
+        return service.registrar(
+                request.getEstudianteId(),
+                request.getEstado()
+        );
     }
 
     @GetMapping

@@ -17,28 +17,45 @@ public class EstudianteController {
         this.service = service;
     }
 
+    // ✅ CREAR
     @PostMapping
-    public Estudiante crear(@RequestBody Estudiante e) {
-        System.out.println("LLEGO ESTUDIANTE: " + e);
-        return service.guardar(e);
+    public ResponseEntity<Estudiante> crear(@RequestBody Estudiante e) {
+        Estudiante guardado = service.guardar(e);
+        return ResponseEntity.ok(guardado);
     }
 
+    // ✅ LISTAR
     @GetMapping
-    public List<Estudiante> listar() {
-        return service.listar();
+    public ResponseEntity<List<Estudiante>> listar() {
+        return ResponseEntity.ok(service.listarTodos());
     }
 
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
-        service.eliminar(id);
+    // ✅ BUSCAR POR ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Estudiante> obtenerPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
+
+    // ✅ ACTUALIZAR
     @PutMapping("/{id}")
     public ResponseEntity<Estudiante> actualizar(
             @PathVariable Long id,
-            @RequestBody Estudiante estudiante) {
+            @RequestBody Estudiante datos) {
 
-        Estudiante actualizado = service.actualizar(id, estudiante);
+        Estudiante existente = service.buscarPorId(id);
+
+        existente.setNombre(datos.getNombre());
+        existente.setGrado(datos.getGrado());
+
+        Estudiante actualizado = service.guardar(existente);
+
         return ResponseEntity.ok(actualizado);
     }
 
+    // ✅ ELIMINAR
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        service.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
 }

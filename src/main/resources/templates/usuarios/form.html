@@ -1,0 +1,39 @@
+<div th:replace="fragments/layout :: layout(~{::section})" xmlns:th="http://www.w3.org/1999/xhtml">
+  <section>
+
+    <h3 th:text="${usuario.id == null} ? 'Nuevo Usuario' : 'Editar Usuario'"></h3>
+
+    <form th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post">
+
+      <input type="hidden" th:field="*{id}">
+
+      <div class="mb-3">
+        <label>Usuario</label>
+        <input th:field="*{username}" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label>Contraseña</label>
+        <input type="password" th:field="*{password}" class="form-control">
+        <small>Si editas y lo dejas vacío, no cambia</small>
+      </div>
+
+      <div class="mb-3">
+        <label>Rol</label>
+        <select th:field="*{rol}" class="form-control">
+
+          <option value="ADMIN">ADMIN</option>
+          <option value="DOCENTE">DOCENTE</option>
+          <option value="SECRETARIA">SECRETARIA</option>
+
+        </select>
+      </div>
+
+      <button class="btn btn-success">
+        Guardar
+      </button>
+
+    </form>
+
+  </section>
+</div>

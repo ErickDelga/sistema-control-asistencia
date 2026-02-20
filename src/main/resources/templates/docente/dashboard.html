@@ -1,0 +1,15 @@
+<div th:replace="fragments/layout :: layout(~{::section})" xmlns:th="http://www.w3.org/1999/xhtml">
+  <section>
+
+    <h2>Panel Docente</h2>
+
+    <a th:href="@{/clases}" class="btn btn-success mb-3">
+      Mis Clases
+    </a>
+
+    <a th:href="@{/estudiantes}" class="btn btn-info mb-3">
+      Estudiantes
+    </a>
+
+  </section>
+</div>

@@ -8,37 +8,27 @@ import java.util.List;
 
 @Service
 public class EstudianteService {
+
     private final EstudianteRepository repo;
 
     public EstudianteService(EstudianteRepository repo) {
         this.repo = repo;
     }
 
-    public Estudiante actualizar(Long id, Estudiante datos) {
-        Estudiante existente = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Estudiante no encontrado"));
-
-        existente.setNombre(datos.getNombre());
-        existente.setGrado(datos.getGrado());
-
-        return repo.save(existente);
-    }
-
     public Estudiante guardar(Estudiante e) {
         return repo.save(e);
     }
 
-    public List<Estudiante> listar() {
+    public List<Estudiante> listarTodos() {
         return repo.findAll();
     }
 
-    public void eliminar(Long id) {
-        if (!repo.existsById(id)) {
-            throw new RuntimeException("El estudiante no existe");
-        }
-        repo.deleteById(id);
+    public Estudiante buscarPorId(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Estudiante no encontrado"));
     }
-    public List<Estudiante> listarTodos() {
-        return repo.findAll();
+
+    public void eliminar(Long id) {
+        repo.deleteById(id);
     }
 }

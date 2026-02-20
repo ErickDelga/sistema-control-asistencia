@@ -23,53 +23,54 @@ public class AsistenciaService {
         this.repoEstudiante = repoEstudiante;
     }
 
-//    public Asistencia registrar(Asistencia a) {
-//        if (a.getFecha().isAfter(LocalDate.now())) {
-//            throw new RuntimeException("La fecha no puede ser futura");
-//        }
-//        return repo.save(a);
-//    }
+    // ===============================
+    // REGISTRAR ASISTENCIA (CON VALIDACIÓN)
+    // ===============================
+    public Asistencia registrar(Long estudianteId, EstadoAsistencia estado){
 
-    public Asistencia registrar(AsistenciaRequest request) {
+        LocalDate hoy = LocalDate.now();
 
-        Estudiante estudiante = repoEstudiante.findById(request.getEstudianteId())
+        // 🔴 Validar que no exista asistencia duplicada
+        if (repoAsistencia.existsByEstudianteIdAndFecha(estudianteId, hoy)) {
+            throw new RuntimeException("El estudiante ya tiene asistencia registrada hoy");
+        }
+
+        Estudiante estudiante = repoEstudiante.findById(estudianteId)
                 .orElseThrow(() -> new RuntimeException("Estudiante no encontrado"));
 
         Asistencia asistencia = new Asistencia();
-        asistencia.setFecha(LocalDate.now());
-        asistencia.setEstado(request.getEstado());
+        asistencia.setFecha(hoy);
+        asistencia.setEstado(estado);
         asistencia.setEstudiante(estudiante);
 
         return repoAsistencia.save(asistencia);
     }
 
+    // ===============================
+    // LISTAR TODAS
+    // ===============================
     public List<Asistencia> listar() {
         return repoAsistencia.findAll();
     }
+
+    // ===============================
+    // LISTAR POR FECHA
+    // ===============================
     public List<Asistencia> listarPorFecha(LocalDate fecha) {
         return repoAsistencia.findByFecha(fecha);
     }
 
+    // ===============================
+    // LISTAR POR ESTUDIANTE
+    // ===============================
     public List<Asistencia> listarPorEstudiante(Long estudianteId) {
         return repoAsistencia.findByEstudianteId(estudianteId);
     }
 
-    public List<Asistencia> listarPorGrado(String grupo) {
-        return repoAsistencia.findByEstudianteGrado(grupo);
-    }
-    public List<Asistencia> listarTodas() {
-        return repoAsistencia.findAll();
-    }
-    public Asistencia registrar(Long estudianteId, EstadoAsistencia estado){
-
-        Estudiante estudiante = repoEstudiante.findById(estudianteId)
-                .orElseThrow(() -> new RuntimeException("Estudiante no encontrado"));
-
-        Asistencia a = new Asistencia();
-        a.setFecha(LocalDate.now());
-        a.setEstado(estado);
-        a.setEstudiante(estudiante);
-
-        return repoAsistencia.save(a);
+    // ===============================
+    // LISTAR POR GRADO
+    // ===============================
+    public List<Asistencia> listarPorGrado(String grado) {
+        return repoAsistencia.findByEstudianteGrado(grado);
     }
 }

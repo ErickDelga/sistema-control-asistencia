@@ -1,57 +1,49 @@
 package com.asistencia.controller.view;
 
+import com.asistencia.model.Rol;
 import com.asistencia.model.Usuario;
 import com.asistencia.services.UsuarioService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/usuarios")
+@PreAuthorize("hasRole('ADMIN')")
 public class UsuarioViewController {
 
-    private final UsuarioService service;
+    private final UsuarioService usuarioService;
 
-    public UsuarioViewController(UsuarioService service) {
-        this.service = service;
+    public UsuarioViewController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
     }
 
-//    @GetMapping
-//    public String vistaUsuarios() {
-//        return "usuarios";
-//    }
-//
-//    @PostMapping("/guardar")
-//    public String guardar(Usuario u) {
-//        service.guardar(u);
-//        return "redirect:/usuarios";
-//    }
-// ✅ LISTAR + FORM
-@GetMapping
-public String vistaUsuarios(Model model) {
+    @GetMapping
+    public String listar(Model model) {
+        model.addAttribute("usuarios", usuarioService.listar());
+        model.addAttribute("usuario", new Usuario()); // 👈 necesario para el formulario
+        model.addAttribute("roles", Rol.values());    // 👈 ENVÍA TODOS LOS ROLES
+        return "usuarios/lista";
+    }
 
-    model.addAttribute("usuarios", service.listarTodos());
-
-    return "usuarios";
-}
-
-    // ✅ GUARDAR
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute Usuario u,
-                          RedirectAttributes ra) {
-
-        try {
-            service.guardar(u);
-            ra.addFlashAttribute("ok", "Usuario creado correctamente");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Error al crear usuario");
-        }
-
+    public String guardar(@ModelAttribute Usuario usuario) {
+        usuarioService.guardar(usuario);
         return "redirect:/usuarios";
     }
 
+    @GetMapping("/editar/{id}")
+    public String editar(@PathVariable Long id, Model model) {
+        model.addAttribute("usuario", usuarioService.buscarPorId(id));
+        model.addAttribute("usuarios", usuarioService.listar());
+        model.addAttribute("roles", Rol.values()); // 👈 también aquí
+        return "usuarios/lista";
+    }
+
+    @GetMapping("/eliminar/{id}")
+    public String eliminar(@PathVariable Long id) {
+        usuarioService.eliminar(id);
+        return "redirect:/usuarios";
+    }
 }

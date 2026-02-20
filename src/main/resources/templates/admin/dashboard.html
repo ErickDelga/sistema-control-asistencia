@@ -1,0 +1,23 @@
+<div th:replace="fragments/layout :: layout(~{::section})" xmlns:th="http://www.w3.org/1999/xhtml">
+    <section>
+
+        <h2>Panel Administrador</h2>
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <a th:href="@{/usuarios}" class="btn btn-primary w-100 mb-3">
+                    CRUD Usuarios
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a th:href="@{/reportes}" class="btn btn-secondary w-100 mb-3">
+                    Reportes
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+</div>

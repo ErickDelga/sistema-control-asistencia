@@ -3,16 +3,16 @@ package com.asistencia.controller.view;
 import com.asistencia.model.Estudiante;
 import com.asistencia.services.EstudianteService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/estudiantes")
+@PreAuthorize("hasAnyRole('DOCENTE','ADMIN')")
 public class EstudianteViewController {
 
     private final EstudianteService estudianteService;
@@ -21,40 +21,47 @@ public class EstudianteViewController {
         this.estudianteService = estudianteService;
     }
 
+    // 🔹 LISTAR
     @GetMapping
-    public String listarEstudiantes(Model model) {
+    public String listar(Model model) {
         model.addAttribute("estudiantes", estudianteService.listarTodos());
-        model.addAttribute("estudiante", new Estudiante()); // para el form si lo usas con th:object
-        return "estudiantes";
+        return "estudiantes/listar";
     }
 
+    // 🔹 FORM NUEVO
+    @GetMapping("/nuevo")
+    public String nuevo(Model model) {
+        model.addAttribute("estudiante", new Estudiante());
+        return "estudiantes/form";
+    }
 
-//    @PostMapping("/guardar")
-//    public String guardar(@Valid Estudiante e, BindingResult result){
-//        estudianteService.guardar(e);
-//        ra.addFlashAttribute("ok", "Estudiante guardado correctamente");
-//        return "redirect:/estudiantes";
-//    }
-
+    // 🔹 GUARDAR / ACTUALIZAR
     @PostMapping("/guardar")
-    public String guardar(
-            @Valid Estudiante e,
-            BindingResult result,
-            RedirectAttributes ra,
-            Model model
-    ) {
+    public String guardar(@Valid @ModelAttribute Estudiante e,
+                          BindingResult result,
+                          RedirectAttributes ra) {
 
-        // 🔎 si hay errores de validación backend
         if (result.hasErrors()) {
-            model.addAttribute("estudiantes", estudianteService.listarTodos());
-            return "estudiantes";
+            return "estudiantes/form";
         }
 
         estudianteService.guardar(e);
-
-        // ✅ mensaje flash bootstrap
         ra.addFlashAttribute("ok", "Estudiante guardado correctamente");
+        return "redirect:/estudiantes";
+    }
 
+    // 🔹 EDITAR
+    @GetMapping("/editar/{id}")
+    public String editar(@PathVariable Long id, Model model) {
+        model.addAttribute("estudiante", estudianteService.buscarPorId(id));
+        return "estudiantes/form";
+    }
+
+    // 🔹 ELIMINAR
+    @GetMapping("/eliminar/{id}")
+    public String eliminar(@PathVariable Long id, RedirectAttributes ra) {
+        estudianteService.eliminar(id);
+        ra.addFlashAttribute("ok", "Estudiante eliminado correctamente");
         return "redirect:/estudiantes";
     }
 }
