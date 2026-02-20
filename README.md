@@ -1,136 +1,194 @@
-Sistema de Control de Asistencia
-Descripción
+# 📘 Sistema de Control de Asistencia
 
-Sistema para la gestión de usuarios, estudiantes y registro de asistencia, desarrollado con Spring Boot, siguiendo el modelo MVC, combinando servicios REST y vistas web.
+## 📖 Descripción
 
-El proyecto se desarrolla de forma incremental según un cronograma académico, incorporando funcionalidades semana a semana hasta su despliegue final.
+Sistema web para la gestión de usuarios, estudiantes y registro de asistencia escolar, desarrollado con **Spring Boot**, siguiendo el patrón de arquitectura **MVC + Service Layer**, combinando servicios REST y vistas web con Thymeleaf.
 
-Arquitectura
+El proyecto se desarrolla de forma incremental según un cronograma académico, incorporando funcionalidades semana a semana hasta su consolidación final.
 
-Arquitectura MVC + capa de servicios:
+---
 
-controller
+# 🏗 Arquitectura
 
-Endpoints REST (/api/**)
+Arquitectura basada en el patrón:
 
-Controladores MVC para vistas web
+**MVC + Capa de Servicios**
 
-service
+### 📂 Estructura del Proyecto
 
-Lógica de negocio
+- **controller**
+    - Endpoints REST (`/api/**`)
+    - Controladores MVC para vistas web
+- **service**
+    - Lógica de negocio
+    - Validaciones del sistema
+- **repository**
+    - Acceso a datos mediante Spring Data JPA
+- **model**
+    - Entidades del sistema (JPA)
+- **dto**
+    - Objetos de transferencia de datos para peticiones específicas
+- **templates**
+    - Vistas HTML con Thymeleaf
+- **static**
+    - Archivos JS y CSS externos
 
-repository
+### 📌 Aplicación del patrón MVC
 
-Acceso a datos (Spring Data JPA)
+- **Model** → Entidades JPA
+- **View** → Respuestas JSON y vistas HTML (Thymeleaf)
+- **Controller** → Controladores REST y MVC
 
-model
+---
 
-Entidades del sistema (JPA)
+# 🛠 Tecnologías Utilizadas
 
-dto
+- Java 21 (LTS)
+- Spring Boot 4.0.1
+- Spring Data JPA
+- Spring Security (HTTP Basic + Form Login)
+- Thymeleaf
+- MySQL
+- Maven
+- Bootstrap (CDN)
+- JavaScript externo para validaciones
 
-Objetos de transferencia para peticiones específicas
+---
 
-Model: Entidades JPA
-View: Respuestas JSON y vistas HTML (Thymeleaf)
-Controller: Controladores REST y MVC
+# 🚀 Funcionalidades Implementadas
 
-Tecnologías
+## 👤 Gestión de Usuarios
 
-Java 21 (LTS)
+- Registro y autenticación de usuarios
+- Encriptación de contraseñas
+- Roles del sistema:
+    - ADMIN
+    - DOCENTE
+    - RECTORIA
+- Restricción de acceso por rol
 
-Spring Boot 4.0.1
+---
 
-Spring Data JPA
+## 🎓 Gestión de Estudiantes
 
-Spring Security (HTTP Basic + Form Login)
+- Crear estudiante
+- Listar estudiantes
+- Actualizar estudiante
+- Eliminar estudiante
+- Validaciones backend
+- Validaciones JavaScript externas (Semana 11)
+- Integración completa con vistas Thymeleaf
 
-Thymeleaf
+---
 
-MySQL
+## 📋 Gestión de Asistencias
 
-Maven
+- Registro de asistencia por estudiante
+- Estados:
+    - Presente
+    - Ausente
+    - Tarde
+- Consultas por:
+    - Fecha
+    - Grado
+    - Estudiante
+- Validación para evitar registros duplicados por fecha
+- Mejoras en flujo de registro
+- Resumen y optimización de consultas
 
-Funcionalidades implementadas
+---
 
-Gestión de usuarios
+# 🔐 Seguridad
 
-Seguridad básica y roles del sistema
+- Autenticación HTTP Basic para endpoints REST
+- Autenticación por formulario para vistas web
+- Protección de rutas `/api/**`
+- Acceso a vistas restringido a usuarios autenticados
+- Manejo de roles con Spring Security
+- Usuario de prueba para entorno académico
 
-CRUD de estudiantes
+---
 
-Registro de asistencia
+# 🌐 Interfaz Web (Thymeleaf)
 
-Consultas de asistencia por:
+Implementada desde Semana 10:
 
-Fecha
+- Login personalizado
+- Menú principal
+- Vistas para estudiantes
+- Vistas para asistencia
+- Formularios MVC completos
+- Integración de servicios existentes con interfaz gráfica
 
-Grado
+---
 
-Estudiante (Semana 9)
+# 🔌 Endpoints REST Principales
 
-Interfaz web con Thymeleaf (Semana 10):
+## 📘 Estudiantes
 
-Login personalizado
+- `POST /api/estudiantes`
+- `GET /api/estudiantes`
+- `PUT /api/estudiantes/{id}`
+- `DELETE /api/estudiantes/{id}`
 
-Menú principal
+## 📋 Asistencias
 
-Vistas para estudiantes y asistencia
+- `POST /api/asistencias`
+- `GET /api/asistencias`
+- `GET /api/asistencias/grado/{grado}`
+- `GET /api/asistencias/fecha/{fecha}`
+- `GET /api/asistencias/estudiante/{id}`
 
-Integración de vistas con servicios existentes
+---
 
-Seguridad
+# 🖥 Vistas Web Principales
 
-Autenticación básica con Spring Security para endpoints REST
+- `GET /login` → Pantalla de autenticación
+- `GET /` → Home del sistema
+- `GET /menu` → Menú principal
+- `GET /estudiantes` → Gestión visual de estudiantes
+- `GET /asistencias` → Registro y consulta de asistencia
 
-Autenticación por formulario para vistas web
+---
 
-Usuario de prueba para entorno académico
+# 📈 Evolución del Proyecto
 
-Endpoints protegidos bajo /api/**
+### 🔹 Semanas 3 – 8
+- Estructura MVC
+- Modelado de entidades JPA
+- CRUD de usuarios
+- Seguridad básica
+- CRUD de estudiantes
+- Registro inicial de asistencia
 
-Acceso a vistas restringido a usuarios autenticados
+### 🔹 Semana 9
+- Filtros avanzados de asistencia
+- Consulta por estudiante
+- Ajustes de seguridad
 
-Endpoints principales (API REST)
-Estudiantes
+### 🔹 Semana 10
+- Integración de vistas Thymeleaf
+- Login personalizado
+- Organización de arquitectura
+- Documentación inicial
 
-POST /api/estudiantes
+### 🔹 Semana 11
+- Formularios MVC completos
+- Validaciones JavaScript externas
+- Separación clara entre controladores REST y MVC
 
-GET /api/estudiantes
+### 🔹 Semana 12
+- Optimización de lógica de negocio
+- Mejoras en flujo de registro de asistencia
+- Organización y limpieza de servicios
 
-PUT /api/estudiantes/{id}
+### 🔹 Semana 13
+- Validación para evitar asistencia duplicada por fecha
+- Mejoras estructurales en controladores
+- Estabilidad general del sistema
 
-DELETE /api/estudiantes/{id}
+---
 
-Asistencia
+# ▶️ Cómo Ejecutar el Proyecto
 
-POST /api/asistencias
-
-GET /api/asistencias
-
-GET /api/asistencias/grado/{grado}
-
-GET /api/asistencias/fecha/{fecha}
-
-GET /api/asistencias/estudiante/{id}
-
-Vistas web principales
-
-GET /login → Pantalla de autenticación
-
-GET / → Home del sistema
-
-GET /menu → Menú principal
-
-GET /estudiantes → Gestión visual de estudiantes
-
-GET /asistencias → Registro y consulta de asistencia
-
-Estado del proyecto
-
-📌 Avance actual: Semana 10 completada
-🚀 Proyecto en evolución según cronograma académico, orientado a un sistema real de control de asistencia institucional.
-
-Autor
-
-Erick Delgado
+1. Clonar el repositorio:
