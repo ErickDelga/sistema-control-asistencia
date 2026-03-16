@@ -1,52 +1,71 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm"
+     xmlns:th="http://www.thymeleaf.org"
+     th:fragment="navbar">
 
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-
-        <a class="navbar-brand" th:href="@{/home}">
+        <a class="navbar-brand fw-semibold" th:href="@{/dashboard}">
             Sistema Asistencia
         </a>
 
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto">
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#menuNavbar"
+                aria-controls="menuNavbar"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="menuNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/menu}">
-                        Menú
-                    </a>
+                    <a class="nav-link" th:href="@{/dashboard}">Inicio</a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/usuarios}">
-                        Usuarios
-                    </a>
+                <li class="nav-item"
+                    th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                    <a class="nav-link" th:href="@{/usuarios}">Usuarios</a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/estudiantes}">
-                        Estudiantes
-                    </a>
+                <li class="nav-item"
+                    th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'',''SECRETARIA'')')}">
+                    <a class="nav-link" th:href="@{/estudiantes}">Estudiantes</a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/asistencias}">
-                        Asistencias
-                    </a>
+                <li class="nav-item"
+                    th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'',''SECRETARIA'')')}">
+                    <a class="nav-link" th:href="@{/clases}">Clases</a>
                 </li>
 
+                <li class="nav-item"
+                    th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'',''SECRETARIA'')')}">
+                    <a class="nav-link" th:href="@{/asistencias}">Asistencias</a>
+                </li>
+
+                <li class="nav-item"
+                    th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''SECRETARIA'')')}">
+                    <a class="nav-link" th:href="@{/reportes}">Reportes</a>
+                </li>
+
+                <li class="nav-item"
+                    th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'')')}">
+                    <a class="nav-link text-warning fw-semibold" th:href="@{/estudiantes/subir-csv}">
+                        Subir CSV
+                    </a>
+                </li>
             </ul>
 
-            <form th:action="@{/logout}" method="post">
-                <button class="btn btn-danger btn-sm">
-                    Salir
+            <form th:action="@{/logout}" method="post" class="d-flex">
+                <input type="hidden"
+                       th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+                <button type="submit" class="btn btn-outline-light">
+                    Cerrar sesión
                 </button>
             </form>
-
         </div>
     </div>
 </nav>
-
-</body>
-</html>

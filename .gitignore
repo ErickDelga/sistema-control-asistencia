@@ -11,3 +11,6 @@ target/
 # OS
 .DS_Store
 Thumbs.db
+uploads/
+src/main/resources/application-local.properties
+.env

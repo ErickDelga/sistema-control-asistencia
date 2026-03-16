@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout}">
+
+<div th:fragment="contenido" class="py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="mb-1">Importar estudiantes desde CSV</h2>
+      <p class="text-muted mb-0">
+        Sube un archivo CSV para registrar varios estudiantes de una sola vez.
+      </p>
+    </div>
+
+    <a th:href="@{/estudiantes}" class="btn btn-outline-secondary">
+      Volver
+    </a>
+  </div>
+
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <form th:action="@{/estudiantes/subir-csv}" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label">Archivo CSV</label>
+          <input type="file"
+                 name="archivo"
+                 class="form-control"
+                 accept=".csv"
+                 required>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+          <button type="submit" class="btn btn-primary">
+            Subir archivo
+          </button>
+
+          <a th:href="@{/estudiantes}" class="btn btn-outline-secondary">
+            Cancelar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <h5 class="mb-3">Formato esperado</h5>
+
+      <p class="mb-2">
+        Puedes usar encabezado o no. El orden de columnas debe ser:
+      </p>
+
+      <div class="bg-light border rounded p-3 mb-3">
+        <code>nombreCompleto,anio,tipoBachillerato,seccion</code>
+      </div>
+
+      <p class="mb-2">Ejemplo con comas:</p>
+      <div class="bg-light border rounded p-3 mb-3">
+<pre class="mb-0">nombreCompleto,anio,tipoBachillerato,seccion
+Juan Pérez,PRIMERO,GENERAL,A
+María López,SEGUNDO,TECNICO,B
+Carlos Hernández,TERCERO,GENERAL,C</pre>
+      </div>
+
+      <p class="mb-2">También acepta valores como:</p>
+      <div class="bg-light border rounded p-3">
+        <code>1ro</code>, <code>2do</code>, <code>3ro</code>,
+        <code>Primero</code>, <code>Segundo</code>, <code>Tercero</code>,
+        <code>General</code>, <code>Técnico</code>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</html>

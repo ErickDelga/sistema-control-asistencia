@@ -1,39 +1,137 @@
-<div th:replace="fragments/layout :: layout(~{::section})" xmlns:th="http://www.w3.org/1999/xhtml">
-  <section>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout}">
 
-    <h3 th:text="${usuario.id == null} ? 'Nuevo Usuario' : 'Editar Usuario'"></h3>
+<div th:fragment="contenido" class="py-4">
 
-    <form th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="mb-1" th:text="${modoEdicion} ? 'Editar usuario' : 'Crear usuario'">Usuario</h2>
+      <p class="text-muted mb-0">
+        Completa la información del usuario.
+      </p>
+    </div>
 
-      <input type="hidden" th:field="*{id}">
+    <a th:href="@{/usuarios}" class="btn btn-outline-secondary">
+      Volver
+    </a>
+  </div>
 
-      <div class="mb-3">
-        <label>Usuario</label>
-        <input th:field="*{username}" class="form-control" required>
-      </div>
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
 
-      <div class="mb-3">
-        <label>Contraseña</label>
-        <input type="password" th:field="*{password}" class="form-control">
-        <small>Si editas y lo dejas vacío, no cambia</small>
-      </div>
+      <form th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post">
 
-      <div class="mb-3">
-        <label>Rol</label>
-        <select th:field="*{rol}" class="form-control">
+        <input type="hidden" th:field="*{id}">
 
-          <option value="ADMIN">ADMIN</option>
-          <option value="DOCENTE">DOCENTE</option>
-          <option value="SECRETARIA">SECRETARIA</option>
+        <!-- Nombre completo -->
+        <div class="mb-3">
+          <label class="form-label">Nombre completo</label>
+          <input type="text"
+                 th:field="*{nombreCompleto}"
+                 class="form-control"
+                 id="nombreCompleto"
+                 placeholder="Ejemplo: Erick Edgardo Delgado Palacios"
+                 required>
+        </div>
 
-        </select>
-      </div>
+        <!-- Username sugerido -->
+        <div class="mb-3">
+          <label class="form-label">Usuario</label>
+          <input type="text"
+                 th:field="*{username}"
+                 class="form-control"
+                 id="username"
+                 placeholder="Se generará automáticamente">
+          <div class="form-text">
+            Sugerencia automática: primeras 2 letras del primer nombre + 6 letras del apellido.
+          </div>
+        </div>
 
-      <button class="btn btn-success">
-        Guardar
-      </button>
+        <!-- Password -->
+        <div class="mb-3">
+          <label class="form-label" th:text="${modoEdicion} ? 'Nueva contraseña' : 'Contraseña'">Contraseña</label>
+          <input type="password"
+                 th:field="*{password}"
+                 class="form-control"
+                 th:placeholder="${modoEdicion ? 'Déjala vacía si no deseas cambiarla' : 'Ingresa una contraseña'}"
+                 th:required="${!modoEdicion}">
+          <div class="form-text" th:if="${modoEdicion}">
+            Déjala vacía si no deseas cambiar la contraseña actual.
+          </div>
+        </div>
 
-    </form>
+        <!-- Rol -->
+        <div class="mb-4">
+          <label class="form-label">Rol</label>
+          <select th:field="*{rol}" class="form-select" required>
+            <option value="">Seleccione un rol</option>
+            <option th:each="rol : ${roles}"
+                    th:value="${rol}"
+                    th:text="${rol}">
+            </option>
+          </select>
+        </div>
 
-  </section>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="submit" class="btn btn-success">
+            Guardar
+          </button>
+
+          <a th:href="@{/usuarios}" class="btn btn-outline-secondary">
+            Cancelar
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+        const nombreInput = document.getElementById('nombreCompleto');
+        const usernameInput = document.getElementById('username');
+
+        function normalizar(texto) {
+            return texto
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/[^a-z0-9\s]/g, '')
+                .trim();
+        }
+
+        function generarUsername(nombreCompleto) {
+            const limpio = normalizar(nombreCompleto);
+            if (!limpio) return '';
+
+            const partes = limpio.split(/\s+/);
+
+            const primerNombre = partes.length > 0 ? partes[0] : '';
+            const apellido = partes.length >= 3 ? partes[2] : (partes.length >= 2 ? partes[1] : '');
+
+            const parteNombre = primerNombre.substring(0, 2);
+            const parteApellido = apellido.substring(0, 6);
+
+            return (parteNombre + parteApellido).replace(/[^a-z0-9]/g, '');
+        }
+
+        if (nombreInput && usernameInput) {
+            nombreInput.addEventListener('input', function () {
+                const sugerido = generarUsername(nombreInput.value);
+
+                if (!usernameInput.dataset.editadoManual || usernameInput.value.trim() === '') {
+                    usernameInput.value = sugerido;
+                }
+            });
+
+            usernameInput.addEventListener('input', function () {
+                usernameInput.dataset.editadoManual = 'true';
+            });
+        }
+    })();
+  </script>
+
 </div>
+
+</html>

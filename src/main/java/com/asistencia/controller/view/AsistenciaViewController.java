@@ -3,7 +3,7 @@ package com.asistencia.controller.view;
 import com.asistencia.model.Asistencia;
 import com.asistencia.model.EstadoAsistencia;
 import com.asistencia.services.AsistenciaService;
-import com.asistencia.services.EstudianteService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,65 +15,51 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/asistencias")
-@PreAuthorize("hasAnyRole('DOCENTE','ADMIN')")
 public class AsistenciaViewController {
 
     private final AsistenciaService asistenciaService;
-    private final EstudianteService estudianteService;
 
-    public AsistenciaViewController(AsistenciaService asistenciaService,
-                                    EstudianteService estudianteService) {
+    public AsistenciaViewController(AsistenciaService asistenciaService) {
         this.asistenciaService = asistenciaService;
-        this.estudianteService = estudianteService;
     }
 
-    // ===============================
-    // MOSTRAR PANTALLA PRINCIPAL
-    // ===============================
+    @PreAuthorize("hasAnyRole('ADMIN','RECTORIA','DOCENTE','SECRETARIA')")
     @GetMapping
-    public String listar(Model model) {
+    public String listar(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate fecha,
+            Model model) {
 
-        LocalDate hoy = LocalDate.now();
+        List<Asistencia> asistencias = (fecha != null)
+                ? asistenciaService.listarPorFecha(fecha)
+                : asistenciaService.listar();
 
-        List<Asistencia> asistenciasHoy = asistenciaService.listarPorFecha(hoy);
+        model.addAttribute("asistencias", asistencias);
+        model.addAttribute("fechaSeleccionada", fecha);
 
-        long presentes = asistenciasHoy.stream()
-                .filter(a -> a.getEstado() == EstadoAsistencia.PRESENTE)
-                .count();
-
-        long ausentes = asistenciasHoy.stream()
-                .filter(a -> a.getEstado() == EstadoAsistencia.AUSENTE)
-                .count();
-
-        long tarde = asistenciasHoy.stream()
-                .filter(a -> a.getEstado() == EstadoAsistencia.TARDE)
-                .count();
-
-        model.addAttribute("asistencias", asistenciaService.listar());
-        model.addAttribute("estudiantes", estudianteService.listarTodos());
-        model.addAttribute("presentes", presentes);
-        model.addAttribute("ausentes", ausentes);
-        model.addAttribute("tarde", tarde);
-        model.addAttribute("fechaHoy", hoy);
-
-        return "asistencias";
+        return "asistencias/lista";
     }
 
-    // ===============================
-    // GUARDAR ASISTENCIA
-    // ===============================
+    @PreAuthorize("hasAnyRole('ADMIN','RECTORIA','DOCENTE')")
     @PostMapping("/guardar")
-    public String guardar(@RequestParam Long estudianteId,
-                          @RequestParam EstadoAsistencia estado,
-                          RedirectAttributes ra) {
+    public String guardarDesdeClase(
+            @RequestParam Long estudianteId,
+            @RequestParam Long claseId,
+            @RequestParam EstadoAsistencia estado,
+            RedirectAttributes redirectAttributes) {
 
         try {
-            asistenciaService.registrar(estudianteId, estado);
-            ra.addFlashAttribute("ok", "Asistencia registrada correctamente");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
+            asistenciaService.registrarPorClase(estudianteId, claseId, estado);
+            redirectAttributes.addFlashAttribute("success",
+                    "Asistencia registrada correctamente.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error",
+                    "No se pudo registrar la asistencia.");
         }
 
-        return "redirect:/asistencias";
+        return "redirect:/clases/" + claseId + "/asistencias";
     }
 }

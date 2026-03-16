@@ -3,9 +3,8 @@ package com.asistencia.security;
 import com.asistencia.model.Usuario;
 import com.asistencia.repository.UsuarioRepository;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
-
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,16 +22,17 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        Usuario u = usuarioRepository.findByUsername(username)
+        Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("Usuario no encontrado"));
 
         return new User(
-                u.getUsername(),
-                u.getPassword(),
+                usuario.getUsername(),
+                usuario.getPassword(),
                 List.of(new SimpleGrantedAuthority(
-                        "ROLE_" + u.getRol().name()
+                        "ROLE_" + usuario.getRol().name()
                 ))
         );
     }
+
 }

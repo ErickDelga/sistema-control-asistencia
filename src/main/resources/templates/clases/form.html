@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout}">
+
+<div th:fragment="contenido" class="py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="mb-1"
+          th:text="${modoEdicion} ? 'Editar clase' : 'Crear clase'">
+        Clase
+      </h2>
+      <p class="text-muted mb-0">
+        Completa los datos de la clase.
+      </p>
+    </div>
+
+    <a th:href="@{/clases}" class="btn btn-outline-secondary">
+      Volver
+    </a>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+          <form th:action="${modoEdicion} ? @{/clases/actualizar} : @{/clases/guardar}"
+                th:object="${clase}"
+                method="post">
+
+            <input type="hidden" th:field="*{id}">
+
+            <div class="mb-3">
+              <label class="form-label">Asignatura</label>
+              <input type="text"
+                     th:field="*{asignatura}"
+                     class="form-control"
+                     placeholder="Ejemplo: Matemática"
+                     required>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Año</label>
+                <select th:field="*{anio}" class="form-select" required>
+                  <option value="">Seleccione un año</option>
+                  <option th:each="a : ${anios}"
+                          th:value="${a}"
+                          th:text="${a}">
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Tipo de bachillerato</label>
+                <select th:field="*{tipoBachillerato}" class="form-select" required>
+                  <option value="">Seleccione un tipo</option>
+                  <option th:each="t : ${tiposBachillerato}"
+                          th:value="${t}"
+                          th:text="${t}">
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Sección</label>
+                <input type="text"
+                       th:field="*{seccion}"
+                       class="form-control"
+                       placeholder="Ej: A"
+                       maxlength="1"
+                       style="text-transform: uppercase;"
+                       required>
+              </div>
+            </div>
+
+            <div class="mt-4" th:if="${esAdminORectoria}">
+              <label class="form-label">Docente asignado</label>
+              <select th:field="*{docente.id}" class="form-select" required>
+                <option value="">Seleccione un docente</option>
+                <option th:each="d : ${docentes}"
+                        th:value="${d.id}"
+                        th:text="${d.nombreCompleto + ' (' + d.username + ')'}">
+                </option>
+              </select>
+            </div>
+
+            <div class="alert alert-info mt-4 mb-4" th:unless="${esAdminORectoria}">
+              El docente se asignará automáticamente con el usuario que haya iniciado sesión.
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+              <button type="submit" class="btn btn-primary"
+                      th:text="${modoEdicion} ? 'Actualizar clase' : 'Guardar clase'">
+                Guardar clase
+              </button>
+
+              <a th:href="@{/clases}" class="btn btn-outline-secondary">
+                Cancelar
+              </a>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</html>

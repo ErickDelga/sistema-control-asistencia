@@ -1,7 +1,9 @@
 package com.asistencia.controller.api;
 
 import com.asistencia.dto.AsistenciaRequest;
+import com.asistencia.model.Anio;
 import com.asistencia.model.Asistencia;
+import com.asistencia.model.EstadoAsistencia;
 import com.asistencia.services.AsistenciaService;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,14 @@ public class AsistenciaController {
 
     @PostMapping
     public Asistencia registrar(@RequestBody AsistenciaRequest request) {
+        if (request.getClaseId() != null) {
+            return service.registrarPorClase(
+                    request.getEstudianteId(),
+                    request.getClaseId(),
+                    request.getEstado()
+            );
+        }
+
         return service.registrar(
                 request.getEstudianteId(),
                 request.getEstado()
@@ -41,8 +51,19 @@ public class AsistenciaController {
         return service.listarPorEstudiante(id);
     }
 
-    @GetMapping("/grado/{grado}")
-    public List<Asistencia> porGrado(@PathVariable String grupo) {
-        return service.listarPorGrado(grupo);
+    @GetMapping("/anio/{anio}")
+    public List<Asistencia> porAnio(@PathVariable Anio anio) {
+        return service.listarPorAnio(anio);
+    }
+
+    @GetMapping("/contador")
+    public long contarPorFechaYEstado(
+            @RequestParam String fecha,
+            @RequestParam EstadoAsistencia estado) {
+
+        return service.contarPorFechaYEstado(
+                LocalDate.parse(fecha),
+                estado
+        );
     }
 }
