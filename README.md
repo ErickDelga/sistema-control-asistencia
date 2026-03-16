@@ -1,194 +1,133 @@
-# 📘 Sistema de Control de Asistencia
+# Sistema de Control de Asistencia Escolar
 
-## 📖 Descripción
+Aplicación web desarrollada con **Spring Boot** para gestionar la asistencia de estudiantes por **año, tipo de bachillerato y sección**.
 
-Sistema web para la gestión de usuarios, estudiantes y registro de asistencia escolar, desarrollado con **Spring Boot**, siguiendo el patrón de arquitectura **MVC + Service Layer**, combinando servicios REST y vistas web con Thymeleaf.
-
-El proyecto se desarrolla de forma incremental según un cronograma académico, incorporando funcionalidades semana a semana hasta su consolidación final.
+El sistema permite a los docentes registrar asistencia y a la administración consultar información y reportes de forma organizada.
 
 ---
 
-# 🏗 Arquitectura
+# Funcionalidades principales
 
-Arquitectura basada en el patrón:
-
-**MVC + Capa de Servicios**
-
-### 📂 Estructura del Proyecto
-
-- **controller**
-    - Endpoints REST (`/api/**`)
-    - Controladores MVC para vistas web
-- **service**
-    - Lógica de negocio
-    - Validaciones del sistema
-- **repository**
-    - Acceso a datos mediante Spring Data JPA
-- **model**
-    - Entidades del sistema (JPA)
-- **dto**
-    - Objetos de transferencia de datos para peticiones específicas
-- **templates**
-    - Vistas HTML con Thymeleaf
-- **static**
-    - Archivos JS y CSS externos
-
-### 📌 Aplicación del patrón MVC
-
-- **Model** → Entidades JPA
-- **View** → Respuestas JSON y vistas HTML (Thymeleaf)
-- **Controller** → Controladores REST y MVC
+- Gestión de usuarios del sistema
+- Registro y administración de estudiantes
+- Creación y gestión de clases
+- Registro de asistencia por clase
+- Dashboard con estadísticas de asistencia
+- Consulta de reportes
+- Importación masiva de estudiantes mediante archivos CSV
+- Fotos opcionales para estudiantes
 
 ---
 
-# 🛠 Tecnologías Utilizadas
+# Roles del sistema
 
-- Java 21 (LTS)
-- Spring Boot 4.0.1
+## Administrador
+- Gestiona usuarios
+- Acceso completo al sistema
+
+## Rectoría
+- Gestiona estudiantes y clases
+- Consulta reportes y asistencias
+
+## Docente
+- Crea clases
+- Registra asistencia
+- Gestiona estudiantes
+- Puede importar estudiantes mediante CSV
+- Solo visualiza las clases que ha creado
+
+## Secretaría
+- Consulta estudiantes, clases y asistencias
+- Acceso a reportes
+
+---
+
+# Tecnologías utilizadas
+
+## Backend
+- Java 21
+- Spring Boot
+- Spring Security
 - Spring Data JPA
-- Spring Security (HTTP Basic + Form Login)
+
+## Frontend
 - Thymeleaf
+- Bootstrap
+- Chart.js
+
+## Base de datos
 - MySQL
+
+## Herramientas
 - Maven
-- Bootstrap (CDN)
-- JavaScript externo para validaciones
+- Git
+- GitHub
+- IntelliJ IDEA
 
 ---
 
-# 🚀 Funcionalidades Implementadas
+# Ejecución del proyecto
 
-## 👤 Gestión de Usuarios
+## 1. Crear la base de datos
 
-- Registro y autenticación de usuarios
-- Encriptación de contraseñas
-- Roles del sistema:
-    - ADMIN
-    - DOCENTE
-    - RECTORIA
-- Restricción de acceso por rol
+```sql
+CREATE DATABASE asistencia_db;
+```
 
----
+## 2. Configurar application.properties
 
-## 🎓 Gestión de Estudiantes
+Ubicación:
 
-- Crear estudiante
-- Listar estudiantes
-- Actualizar estudiante
-- Eliminar estudiante
-- Validaciones backend
-- Validaciones JavaScript externas (Semana 11)
-- Integración completa con vistas Thymeleaf
+```
+src/main/resources/application.properties
+```
 
----
+Ejemplo de configuración:
 
-## 📋 Gestión de Asistencias
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/asistencia_db
+spring.datasource.username=root
+spring.datasource.password=TU_PASSWORD
 
-- Registro de asistencia por estudiante
-- Estados:
-    - Presente
-    - Ausente
-    - Tarde
-- Consultas por:
-    - Fecha
-    - Grado
-    - Estudiante
-- Validación para evitar registros duplicados por fecha
-- Mejoras en flujo de registro
-- Resumen y optimización de consultas
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+```
 
----
+## 3. Ejecutar la aplicación
 
-# 🔐 Seguridad
+Desde IntelliJ ejecutar la clase:
 
-- Autenticación HTTP Basic para endpoints REST
-- Autenticación por formulario para vistas web
-- Protección de rutas `/api/**`
-- Acceso a vistas restringido a usuarios autenticados
-- Manejo de roles con Spring Security
-- Usuario de prueba para entorno académico
+```
+AsistenciaApplication
+```
+
+O desde la terminal:
+
+```bash
+mvn spring-boot:run
+```
+
+La aplicación estará disponible en:
+
+```
+http://localhost:8080
+```
 
 ---
 
-# 🌐 Interfaz Web (Thymeleaf)
+# Importación de estudiantes por CSV
 
-Implementada desde Semana 10:
+El sistema permite cargar estudiantes mediante archivos CSV con el siguiente formato:
 
-- Login personalizado
-- Menú principal
-- Vistas para estudiantes
-- Vistas para asistencia
-- Formularios MVC completos
-- Integración de servicios existentes con interfaz gráfica
-
----
-
-# 🔌 Endpoints REST Principales
-
-## 📘 Estudiantes
-
-- `POST /api/estudiantes`
-- `GET /api/estudiantes`
-- `PUT /api/estudiantes/{id}`
-- `DELETE /api/estudiantes/{id}`
-
-## 📋 Asistencias
-
-- `POST /api/asistencias`
-- `GET /api/asistencias`
-- `GET /api/asistencias/grado/{grado}`
-- `GET /api/asistencias/fecha/{fecha}`
-- `GET /api/asistencias/estudiante/{id}`
+```
+nombreCompleto,anio,tipoBachillerato,seccion
+Juan Pérez,PRIMERO,GENERAL,A
+Ana López,SEGUNDO,TECNICO,B
+Carlos Martínez,TERCERO,SOFTWARE,A
+```
 
 ---
 
-# 🖥 Vistas Web Principales
+# Autor
 
-- `GET /login` → Pantalla de autenticación
-- `GET /` → Home del sistema
-- `GET /menu` → Menú principal
-- `GET /estudiantes` → Gestión visual de estudiantes
-- `GET /asistencias` → Registro y consulta de asistencia
-
----
-
-# 📈 Evolución del Proyecto
-
-### 🔹 Semanas 3 – 8
-- Estructura MVC
-- Modelado de entidades JPA
-- CRUD de usuarios
-- Seguridad básica
-- CRUD de estudiantes
-- Registro inicial de asistencia
-
-### 🔹 Semana 9
-- Filtros avanzados de asistencia
-- Consulta por estudiante
-- Ajustes de seguridad
-
-### 🔹 Semana 10
-- Integración de vistas Thymeleaf
-- Login personalizado
-- Organización de arquitectura
-- Documentación inicial
-
-### 🔹 Semana 11
-- Formularios MVC completos
-- Validaciones JavaScript externas
-- Separación clara entre controladores REST y MVC
-
-### 🔹 Semana 12
-- Optimización de lógica de negocio
-- Mejoras en flujo de registro de asistencia
-- Organización y limpieza de servicios
-
-### 🔹 Semana 13
-- Validación para evitar asistencia duplicada por fecha
-- Mejoras estructurales en controladores
-- Estabilidad general del sistema
-
----
-
-# ▶️ Cómo Ejecutar el Proyecto
-
-1. Clonar el repositorio:
+Proyecto académico desarrollado para la gestión de asistencia en instituciones educativas.
