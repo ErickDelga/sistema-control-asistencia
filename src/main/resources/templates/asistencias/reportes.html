@@ -4,12 +4,16 @@
 
 <div th:fragment="contenido" class="py-4">
 
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="page-header">
     <div>
-      <h2 class="mb-1">Reportes de asistencia</h2>
-      <p class="text-muted mb-0">
-        Consulta y descarga reportes filtrados por fecha, asignatura, año, tipo de bachillerato y sección.
+      <h2 class="page-title">Reportes de asistencia</h2>
+      <p class="page-subtitle">
+        Consulta y exporta asistencias por rango de fechas, nombres, apellidos y filtros académicos.
       </p>
+    </div>
+
+    <div class="btn-toolbar-main">
+      <a th:href="@{/reportes}" class="btn btn-outline-secondary">Limpiar filtros</a>
     </div>
   </div>
 
@@ -17,43 +21,60 @@
     <div class="card-body">
       <form th:action="@{/reportes}" method="get" class="row g-3">
 
+        <div class="col-12">
+          <label class="form-label fw-semibold">Filtros rápidos</label>
+          <div class="d-flex flex-wrap gap-2">
+            <button type="submit" name="periodo" value="HOY" class="btn btn-primary btn-sm">Hoy</button>
+            <button type="submit" name="periodo" value="SEMANA" class="btn btn-outline-primary btn-sm">Semana</button>
+            <button type="submit" name="periodo" value="MES" class="btn btn-outline-primary btn-sm">Mes</button>
+          </div>
+        </div>
+
         <div class="col-md-3">
-          <label class="form-label">Fecha</label>
-          <input type="date"
-                 name="fecha"
-                 class="form-control"
-                 th:value="${fecha}">
+          <label class="form-label">Fecha inicio</label>
+          <input type="date" name="fechaInicio" class="form-control" th:value="${fechaInicio}">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Fecha fin</label>
+          <input type="date" name="fechaFin" class="form-control" th:value="${fechaFin}">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Nombres</label>
+          <input type="text" name="nombres" class="form-control" th:value="${nombres}" placeholder="Buscar por nombres">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Apellidos</label>
+          <input type="text" name="apellidos" class="form-control" th:value="${apellidos}" placeholder="Buscar por apellidos">
         </div>
 
         <div class="col-md-3">
           <label class="form-label">Asignatura</label>
-          <input type="text"
-                 name="asignatura"
-                 class="form-control"
-                 placeholder="Ej: Matemática"
-                 th:value="${asignatura}">
+          <input type="text" name="asignatura" class="form-control" th:value="${asignatura}" placeholder="Ej: Matemática">
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md-3">
           <label class="form-label">Año</label>
           <select name="anio" class="form-select">
             <option value="">Todos</option>
             <option th:each="a : ${anios}"
                     th:value="${a}"
-                    th:text="${a}"
-                    th:selected="${anio != null and anio.name() == a.name()}">
+                    th:selected="${anio == a}"
+                    th:text="${a}">
             </option>
           </select>
         </div>
 
-        <div class="col-md-2">
-          <label class="form-label">Tipo Bachillerato</label>
+        <div class="col-md-4">
+          <label class="form-label">Tipo de bachillerato</label>
           <select name="tipoBachillerato" class="form-select">
             <option value="">Todos</option>
             <option th:each="t : ${tiposBachillerato}"
                     th:value="${t}"
-                    th:text="${t}"
-                    th:selected="${tipoBachillerato != null and tipoBachillerato.name() == t.name()}">
+                    th:selected="${tipoBachillerato == t}"
+                    th:text="${t.nombreVisible}">
             </option>
           </select>
         </div>
@@ -63,106 +84,80 @@
           <input type="text"
                  name="seccion"
                  class="form-control"
+                 th:value="${seccion}"
                  maxlength="1"
                  placeholder="A"
-                 style="text-transform: uppercase;"
-                 th:value="${seccion}">
+                 style="text-transform: uppercase;">
         </div>
 
-        <div class="col-12 d-flex flex-wrap gap-2">
-          <button type="submit" class="btn btn-primary">
-            Filtrar
-          </button>
+        <div class="col-12">
+          <div class="d-flex flex-wrap gap-2">
+            <button type="submit" class="btn btn-primary">Buscar</button>
 
-          <a th:href="@{/reportes}" class="btn btn-outline-secondary">
-            Limpiar
-          </a>
-
-          <a th:href="@{/reportes/descargar-csv(
-                        fecha=${fecha},
-                        asignatura=${asignatura},
-                        anio=${anio},
-                        tipoBachillerato=${tipoBachillerato},
-                        seccion=${seccion}
-                    )}"
-             class="btn btn-success">
-            Descargar CSV
-          </a>
+            <a th:href="@{/reportes/csv(
+                            fechaInicio=${fechaInicio},
+                            fechaFin=${fechaFin},
+                            nombres=${nombres},
+                            apellidos=${apellidos},
+                            asignatura=${asignatura},
+                            anio=${anio},
+                            tipoBachillerato=${tipoBachillerato},
+                            seccion=${seccion},
+                            periodo=${periodo}
+                         )}"
+               class="btn btn-success">
+              Exportar CSV
+            </a>
+          </div>
         </div>
+
       </form>
-    </div>
-  </div>
-
-  <div class="row g-3 mb-4">
-    <div class="col-md-4">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-body">
-          <h6 class="text-muted mb-2">Total de registros</h6>
-          <h3 class="mb-0" th:text="${#lists.size(resultados)}">0</h3>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-body">
-          <h6 class="text-muted mb-2">Presentes</h6>
-          <h3 class="mb-0"
-              th:text="${#aggregates.sum(resultados.![estado.name() == 'PRESENTE' ? 1 : 0])}">
-            0
-          </h3>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-body">
-          <h6 class="text-muted mb-2">Ausentes + Tarde</h6>
-          <h3 class="mb-0"
-              th:text="${#aggregates.sum(resultados.![estado.name() == 'AUSENTE' or estado.name() == 'TARDE' ? 1 : 0])}">
-            0
-          </h3>
-        </div>
-      </div>
     </div>
   </div>
 
   <div class="card shadow-sm border-0">
     <div class="card-body">
 
-      <div th:if="${#lists.isEmpty(resultados)}" class="alert alert-warning mb-0">
-        No se encontraron registros con los filtros aplicados.
+      <div th:if="${#lists.isEmpty(asistencias)}" class="empty-state">
+        <strong>No se encontraron asistencias con los filtros aplicados.</strong>
       </div>
 
-      <div th:unless="${#lists.isEmpty(resultados)}" class="table-responsive">
+      <div th:unless="${#lists.isEmpty(asistencias)}" class="table-responsive">
         <table class="table table-bordered table-hover align-middle mb-0">
           <thead class="table-dark">
           <tr>
-            <th>ID</th>
             <th>Fecha y hora</th>
-            <th>Estudiante</th>
+            <th>Nombres</th>
+            <th>Apellidos</th>
             <th>Asignatura</th>
             <th>Año</th>
             <th>Tipo Bachillerato</th>
             <th>Sección</th>
             <th>Estado</th>
+            <th>Motivo</th>
           </tr>
           </thead>
           <tbody>
-          <tr th:each="a : ${resultados}">
-            <td th:text="${a.id}">1</td>
-            <td th:text="${#temporals.format(a.fechaHora, 'dd/MM/yyyy HH:mm')}">13/03/2026 08:00</td>
-            <td th:text="${a.estudiante != null ? a.estudiante.nombreCompleto : ''}">Nombre</td>
-            <td th:text="${a.clase != null ? a.clase.asignatura : 'Sin clase'}">Asignatura</td>
-            <td th:text="${a.estudiante != null ? a.estudiante.anio : ''}">PRIMERO</td>
-            <td th:text="${a.estudiante != null ? a.estudiante.tipoBachillerato : ''}">GENERAL</td>
-            <td th:text="${a.estudiante != null ? a.estudiante.seccion : ''}">A</td>
-            <td>
-              <span class="badge bg-success" th:if="${a.estado.name() == 'PRESENTE'}">PRESENTE</span>
-              <span class="badge bg-danger" th:if="${a.estado.name() == 'AUSENTE'}">AUSENTE</span>
-              <span class="badge bg-warning text-dark" th:if="${a.estado.name() == 'TARDE'}">TARDE</span>
+          <tr th:each="a : ${asistencias}">
+            <td th:text="${a.fechaHora != null ? #temporals.format(a.fechaHora, 'dd/MM/yyyy HH:mm') : ''}">
+              01/01/2026 08:00
             </td>
+            <td th:text="${a.estudiante != null ? a.estudiante.nombres : ''}">Juan</td>
+            <td th:text="${a.estudiante != null ? a.estudiante.apellidos : ''}">Pérez</td>
+            <td th:text="${a.clase != null ? a.clase.asignatura : ''}">Matemática</td>
+            <td th:text="${a.estudiante != null ? a.estudiante.anio : ''}">PRIMERO</td>
+            <td th:text="${a.estudiante != null && a.estudiante.tipoBachillerato != null ? a.estudiante.tipoBachillerato.nombreVisible : ''}">
+              Bachillerato General
+            </td>
+            <td th:text="${a.estudiante != null ? a.estudiante.seccion : ''}">A</td>
+
+            <td>
+              <span th:if="${a.estado != null and a.estado.name() == 'PRESENTE'}" class="badge bg-success">PRESENTE</span>
+              <span th:if="${a.estado != null and a.estado.name() == 'AUSENTE'}" class="badge bg-danger">AUSENTE</span>
+              <span th:if="${a.estado != null and a.estado.name() == 'TARDE'}" class="badge bg-warning text-dark">TARDE</span>
+            </td>
+
+            <td th:text="${a.motivo != null and !#strings.isEmpty(a.motivo) ? a.motivo : '—'}">Motivo</td>
           </tr>
           </tbody>
         </table>
@@ -171,6 +166,17 @@
     </div>
   </div>
 
-</div>
+  <script>
+    (function () {
+      const seccionInput = document.querySelector('input[name="seccion"]');
 
+      if (seccionInput) {
+        seccionInput.addEventListener('input', function () {
+          this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 1);
+        });
+      }
+    })();
+  </script>
+
+</div>
 </html>

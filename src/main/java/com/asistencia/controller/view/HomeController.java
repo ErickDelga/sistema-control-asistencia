@@ -9,9 +9,31 @@ public class HomeController {
 
     @GetMapping({"/", "/home"})
     public String home(Authentication auth) {
-        if (auth != null && auth.isAuthenticated()) {
+
+        if (auth == null) {
+            return "redirect:/login";
+        }
+
+        if (auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             return "redirect:/dashboard";
         }
-        return "redirect:/login";
+
+        if (auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_RECTORIA"))) {
+            return "redirect:/dashboard";
+        }
+
+        if (auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_DOCENTE"))) {
+            return "redirect:/dashboard";
+        }
+
+        if (auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_SECRETARIA"))) {
+            return "redirect:/dashboard";
+        }
+
+        return "redirect:/dashboard";
     }
 }

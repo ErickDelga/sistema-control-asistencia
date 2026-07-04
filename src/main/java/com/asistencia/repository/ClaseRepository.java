@@ -1,9 +1,8 @@
 package com.asistencia.repository;
 
-import com.asistencia.model.Clase;
 import com.asistencia.model.Anio;
+import com.asistencia.model.Clase;
 import com.asistencia.model.TipoBachillerato;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,4 +17,7 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
             String seccion
     );
 
+    List<Clase> findByDocenteUsername(String username);
+
+    List<Clase> findByDocenteId(Long docenteId);
 }

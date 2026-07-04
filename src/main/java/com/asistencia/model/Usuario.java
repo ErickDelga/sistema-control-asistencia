@@ -24,4 +24,15 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Rol rol;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "anio_asignado")
+    private Anio anioAsignado;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_bachillerato_asignado")
+    private TipoBachillerato tipoBachilleratoAsignado;
+
+    @Column(name = "seccion_asignada", length = 1)
+    private String seccionAsignada;
 }

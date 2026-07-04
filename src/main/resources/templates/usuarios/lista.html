@@ -33,6 +33,7 @@
             <th>Usuario</th>
             <th>Nombre completo</th>
             <th>Rol</th>
+            <th>Asignación docente</th>
             <th class="text-center">Acciones</th>
           </tr>
           </thead>
@@ -42,11 +43,31 @@
             <td th:text="${u.id}">1</td>
             <td th:text="${u.username}">admin</td>
             <td th:text="${u.nombreCompleto}">Administrador General</td>
+
             <td>
               <span class="badge text-bg-primary" th:if="${u.rol.name() == 'ADMIN'}">ADMIN</span>
               <span class="badge text-bg-success" th:if="${u.rol.name() == 'RECTORIA'}">RECTORIA</span>
               <span class="badge text-bg-warning text-dark" th:if="${u.rol.name() == 'DOCENTE'}">DOCENTE</span>
               <span class="badge text-bg-secondary" th:if="${u.rol.name() == 'SECRETARIA'}">SECRETARIA</span>
+            </td>
+
+            <td>
+              <div th:if="${u.rol.name() == 'DOCENTE'}">
+                <div>
+                  <strong>Año:</strong>
+                  <span th:text="${u.anioAsignado != null ? u.anioAsignado : '—'}">PRIMERO</span>
+                </div>
+                <div>
+                  <strong>Tipo:</strong>
+                  <span th:text="${u.tipoBachilleratoAsignado != null ? u.tipoBachilleratoAsignado.nombreVisible : '—'}">Bachillerato General</span>
+                </div>
+                <div>
+                  <strong>Sección:</strong>
+                  <span th:text="${u.seccionAsignada != null and !#strings.isEmpty(u.seccionAsignada) ? u.seccionAsignada : '—'}">A</span>
+                </div>
+              </div>
+
+              <span th:unless="${u.rol.name() == 'DOCENTE'}" class="text-muted">—</span>
             </td>
 
             <td class="text-center">

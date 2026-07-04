@@ -4,16 +4,15 @@
 
 <div th:fragment="contenido" class="py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="page-header">
         <div>
-            <h2 class="mb-1">Gestión de estudiantes</h2>
-            <p class="text-muted mb-0">
+            <h2 class="page-title">Gestión de estudiantes</h2>
+            <p class="page-subtitle">
                 Consulta y administración de estudiantes registrados.
             </p>
         </div>
 
-        <div class="d-flex flex-wrap gap-2"
-             th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'')')}">
+        <div class="btn-toolbar-main">
             <a th:href="@{/estudiantes/crear}" class="btn btn-primary">
                 Nuevo estudiante
             </a>
@@ -24,14 +23,14 @@
         </div>
     </div>
 
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
     <div class="card shadow-sm border-0">
         <div class="card-body">
 
-            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-            <div th:if="${#lists.isEmpty(estudiantes)}" class="alert alert-warning mb-0">
-                No hay estudiantes registrados.
+            <div th:if="${#lists.isEmpty(estudiantes)}" class="empty-state">
+                <strong>No hay estudiantes registrados.</strong>
             </div>
 
             <div th:unless="${#lists.isEmpty(estudiantes)}" class="table-responsive">
@@ -40,11 +39,13 @@
                     <tr>
                         <th>ID</th>
                         <th>Foto</th>
-                        <th>Nombre completo</th>
+                        <th>Nombres</th>
+                        <th>Apellidos</th>
                         <th>Año</th>
                         <th>Tipo Bachillerato</th>
                         <th>Sección</th>
-                        <th class="text-center">Acciones</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acción</th>
                     </tr>
                     </thead>
 
@@ -56,8 +57,7 @@
                             <img th:if="${e.foto != null and !#strings.isEmpty(e.foto)}"
                                  th:src="@{'/uploads/' + ${e.foto}}"
                                  alt="Foto del estudiante"
-                                 class="rounded border"
-                                 style="width:50px; height:50px; object-fit:cover;">
+                                 class="img-thumb">
 
                             <span th:if="${e.foto == null or #strings.isEmpty(e.foto)}"
                                   class="badge text-bg-secondary">
@@ -65,32 +65,47 @@
                             </span>
                         </td>
 
-                        <td th:text="${e.nombreCompleto}">Nombre</td>
+                        <td th:text="${e.nombres}">José Antonio</td>
+                        <td th:text="${e.apellidos}">Hernández López</td>
                         <td th:text="${e.anio}">PRIMERO</td>
-                        <td th:text="${e.tipoBachillerato}">GENERAL</td>
+                        <td th:text="${e.tipoBachillerato != null ? e.tipoBachillerato.nombreVisible : ''}">Bachillerato General</td>
                         <td th:text="${e.seccion}">A</td>
 
-                        <td class="text-center">
-                            <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <td>
+                            <span th:if="${e.activo}" class="badge bg-success">Activo</span>
+                            <span th:unless="${e.activo}" class="badge bg-danger">Inactivo</span>
+                        </td>
 
-                                <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'')')}"
-                                   th:href="@{/estudiantes/editar/{id}(id=${e.id})}"
+                        <td class="text-center">
+                            <div class="actions-inline">
+                                <a th:href="@{/estudiantes/editar/{id}(id=${e.id})}"
                                    class="btn btn-warning btn-sm">
                                     Editar
                                 </a>
 
-                                <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'')')}"
-                                   th:href="@{/estudiantes/eliminar/{id}(id=${e.id})}"
+                                <a th:href="@{/estudiantes/eliminar/{id}(id=${e.id})}"
                                    class="btn btn-danger btn-sm"
                                    onclick="return confirm('¿Seguro que deseas eliminar este estudiante?');">
                                     Eliminar
                                 </a>
 
-                                <span th:if="${#authorization.expression('hasRole(''SECRETARIA'')')}"
-                                      class="badge text-bg-secondary">
-                                    Solo consulta
-                                </span>
+                                <form th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''SECRETARIA'')') and !e.activo}"
+                                      th:action="@{/estudiantes/activar/{id}(id=${e.id})}"
+                                      method="post"
+                                      class="d-inline">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        Activar
+                                    </button>
+                                </form>
 
+                                <form th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''SECRETARIA'')') and e.activo}"
+                                      th:action="@{/estudiantes/desactivar/{id}(id=${e.id})}"
+                                      method="post"
+                                      class="d-inline">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        Desactivar
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>

@@ -9,12 +9,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
 
     @Query("""
-        SELECT a FROM Asistencia a
+        SELECT a
+        FROM Asistencia a
         WHERE DATE(a.fechaHora) = :fecha
         ORDER BY a.fechaHora DESC
     """)
@@ -39,20 +41,32 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
         SELECT COUNT(a) > 0
         FROM Asistencia a
         WHERE a.estudiante.id = :estudianteId
-        AND a.clase.id = :claseId
-        AND DATE(a.fechaHora) = :fecha
+          AND a.clase.id = :claseId
+          AND a.fechaHora >= :limite
     """)
-    boolean existsByEstudianteIdAndClaseIdAndFecha(
+    boolean existsBloqueoUnaHora(
             @Param("estudianteId") Long estudianteId,
             @Param("claseId") Long claseId,
-            @Param("fecha") LocalDate fecha
+            @Param("limite") LocalDateTime limite
+    );
+
+    @Query("""
+        SELECT a
+        FROM Asistencia a
+        WHERE a.estudiante.id = :estudianteId
+          AND a.clase.id = :claseId
+        ORDER BY a.fechaHora DESC
+    """)
+    List<Asistencia> findTopByEstudianteIdAndClaseIdOrderByFechaHoraDesc(
+            @Param("estudianteId") Long estudianteId,
+            @Param("claseId") Long claseId
     );
 
     @Query("""
         SELECT COUNT(a)
         FROM Asistencia a
         WHERE DATE(a.fechaHora) = :fecha
-        AND a.estado = :estado
+          AND a.estado = :estado
     """)
     long countByFechaAndEstado(
             @Param("fecha") LocalDate fecha,
@@ -87,18 +101,27 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
         FROM Asistencia a
         LEFT JOIN a.estudiante e
         LEFT JOIN a.clase c
-        WHERE (:fecha IS NULL OR DATE(a.fechaHora) = :fecha)
+        LEFT JOIN c.docente d
+        WHERE (:fechaInicio IS NULL OR DATE(a.fechaHora) >= :fechaInicio)
+          AND (:fechaFin IS NULL OR DATE(a.fechaHora) <= :fechaFin)
+          AND (:nombres IS NULL OR :nombres = '' OR LOWER(e.nombres) LIKE LOWER(CONCAT('%', :nombres, '%')))
+          AND (:apellidos IS NULL OR :apellidos = '' OR LOWER(e.apellidos) LIKE LOWER(CONCAT('%', :apellidos, '%')))
           AND (:asignatura IS NULL OR :asignatura = '' OR LOWER(c.asignatura) LIKE LOWER(CONCAT('%', :asignatura, '%')))
           AND (:anio IS NULL OR e.anio = :anio)
           AND (:tipoBachillerato IS NULL OR e.tipoBachillerato = :tipoBachillerato)
           AND (:seccion IS NULL OR :seccion = '' OR UPPER(e.seccion) = UPPER(:seccion))
+          AND (:docenteId IS NULL OR d.id = :docenteId)
         ORDER BY a.fechaHora DESC
     """)
-    List<Asistencia> buscarParaReporte(
-            @Param("fecha") LocalDate fecha,
+    List<Asistencia> buscarConFiltros(
+            @Param("fechaInicio") LocalDate fechaInicio,
+            @Param("fechaFin") LocalDate fechaFin,
+            @Param("nombres") String nombres,
+            @Param("apellidos") String apellidos,
             @Param("asignatura") String asignatura,
             @Param("anio") Anio anio,
             @Param("tipoBachillerato") TipoBachillerato tipoBachillerato,
-            @Param("seccion") String seccion
+            @Param("seccion") String seccion,
+            @Param("docenteId") Long docenteId
     );
 }

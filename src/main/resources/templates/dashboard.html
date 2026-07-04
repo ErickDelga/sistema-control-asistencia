@@ -4,71 +4,64 @@
 
 <div th:fragment="contenido" class="py-4">
 
-  <div class="mb-4">
-    <h2 class="mb-1">Dashboard</h2>
-    <p class="text-muted mb-0">
-      Bienvenido,
-      <strong th:text="${username}">usuario</strong>
-      <span class="mx-1">|</span>
-      Rol:
-      <strong th:text="${rolNombre}">Rol</strong>
-    </p>
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Dashboard</h2>
+      <p class="page-subtitle">
+        Bienvenido,
+        <strong th:text="${username}">usuario</strong>
+        <span class="mx-1">|</span>
+        Rol:
+        <strong th:text="${rolNombre}">Rol</strong>
+      </p>
+    </div>
   </div>
 
-  <div class="mb-4" th:if="${esAdmin or esRectoria or esSecretaria}">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-      <div>
-        <h4 class="mb-1">Resumen de asistencias del día</h4>
-        <p class="text-muted mb-0">
-          Fecha:
-          <strong th:text="${#temporals.format(fechaDashboard, 'dd/MM/yyyy')}">13/03/2026</strong>
-        </p>
-      </div>
-    </div>
-
-    <div class="row g-3 mb-4">
+  <div class="mb-4">
+    <div class="row g-3">
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="card shadow-sm border-0 h-100">
-          <div class="card-body">
-            <h6 class="text-muted mb-2">Total registros</h6>
-            <h2 class="mb-0" th:text="${totalHoy}">0</h2>
-          </div>
+        <div class="summary-card p-4 h-100 bg-white">
+          <h6>Total del día</h6>
+          <h2 th:text="${totalHoy}">0</h2>
         </div>
       </div>
 
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="card shadow-sm border-0 h-100">
-          <div class="card-body">
-            <h6 class="text-muted mb-2">Presentes</h6>
-            <h2 class="mb-0 text-success" th:text="${presentes}">0</h2>
-          </div>
+        <div class="summary-card p-4 h-100 bg-white">
+          <h6>Presentes</h6>
+          <h2 class="text-success" th:text="${presentes}">0</h2>
         </div>
       </div>
 
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="card shadow-sm border-0 h-100">
-          <div class="card-body">
-            <h6 class="text-muted mb-2">Ausentes</h6>
-            <h2 class="mb-0 text-danger" th:text="${ausentes}">0</h2>
-          </div>
+        <div class="summary-card p-4 h-100 bg-white">
+          <h6>Ausentes</h6>
+          <h2 class="text-danger" th:text="${ausentes}">0</h2>
         </div>
       </div>
 
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="card shadow-sm border-0 h-100">
-          <div class="card-body">
-            <h6 class="text-muted mb-2">Tarde</h6>
-            <h2 class="mb-0 text-warning" th:text="${tarde}">0</h2>
-          </div>
+        <div class="summary-card p-4 h-100 bg-white">
+          <h6>Tardes</h6>
+          <h2 class="text-warning" th:text="${tarde}">0</h2>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="card shadow-sm border-0 mb-4">
-      <div class="card-body">
-        <h5 class="mb-3">Gráfica de asistencia del día</h5>
-        <canvas id="graficaAsistenciaHoy" height="110"></canvas>
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+          <h5 class="mb-1">Resumen de asistencia del día</h5>
+          <p class="text-muted mb-0">
+            Fecha:
+            <strong th:text="${#temporals.format(fechaDashboard, 'dd/MM/yyyy')}">13/03/2026</strong>
+          </p>
+        </div>
       </div>
+
+      <canvas id="graficaAsistenciaHoy" height="100"></canvas>
     </div>
   </div>
 
@@ -79,7 +72,7 @@
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">Usuarios</h5>
           <p class="card-text flex-grow-1">
-            Gestiona usuarios del sistema y sus roles.
+            Gestiona usuarios, roles y asignaciones académicas del sistema.
           </p>
           <a th:href="@{/usuarios}" class="btn btn-light btn-sm">
             Administrar
@@ -88,29 +81,26 @@
       </div>
     </div>
 
-    <div class="col-12 col-md-6 col-xl-3"
-         th:if="${esAdmin or esRectoria or esSecretaria or esDocente}">
+    <div class="col-12 col-md-6 col-xl-3">
       <div class="card bg-success text-white shadow-sm h-100 border-0">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">Estudiantes</h5>
-          <p class="card-text flex-grow-1"
-             th:text="${esDocente} ? 'Registra, consulta, actualiza y carga estudiantes mediante CSV.' : 'Consulta la información de estudiantes registrados.'">
-            Consulta la información de estudiantes registrados.
+          <p class="card-text flex-grow-1">
+            Registro, consulta y administración de estudiantes.
           </p>
           <a th:href="@{/estudiantes}" class="btn btn-light btn-sm">
-            Ver estudiantes
+            Ver módulo
           </a>
         </div>
       </div>
     </div>
 
-    <div class="col-12 col-md-6 col-xl-3"
-         th:if="${esAdmin or esRectoria or esSecretaria or esDocente}">
+    <div class="col-12 col-md-6 col-xl-3">
       <div class="card bg-warning shadow-sm h-100 border-0">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">Clases</h5>
           <p class="card-text flex-grow-1">
-            Revisa las clases disponibles y accede al control de asistencia.
+            Crea clases y accede a la toma de asistencia por asignatura.
           </p>
           <a th:href="@{/clases}" class="btn btn-dark btn-sm">
             Ver clases
@@ -119,13 +109,12 @@
       </div>
     </div>
 
-    <div class="col-12 col-md-6 col-xl-3"
-         th:if="${esAdmin or esRectoria or esSecretaria or esDocente}">
+    <div class="col-12 col-md-6 col-xl-3">
       <div class="card bg-danger text-white shadow-sm h-100 border-0">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">Asistencias</h5>
           <p class="card-text flex-grow-1">
-            Consulta el registro general de asistencias.
+            Consulta general de asistencias registradas en el sistema.
           </p>
           <a th:href="@{/asistencias}" class="btn btn-light btn-sm">
             Ver asistencias
@@ -133,33 +122,32 @@
         </div>
       </div>
     </div>
+
   </div>
 
   <div class="row g-3 mt-1">
 
-    <div class="col-12 col-md-6"
-         th:if="${esAdmin or esRectoria or esSecretaria}">
+    <div class="col-12 col-md-6">
       <div class="card shadow-sm border-0 h-100">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">Reportes</h5>
           <p class="text-muted flex-grow-1">
-            Consulta y descarga reportes de asistencia filtrados por fecha, asignatura, año, tipo de bachillerato y sección.
+            Consulta reportes por fechas, estudiantes, asignaturas y filtros académicos.
           </p>
           <a th:href="@{/reportes}" class="btn btn-outline-primary btn-sm">
-            Ir a reportes
+            Abrir reportes
           </a>
         </div>
       </div>
     </div>
 
     <div class="col-12 col-md-6"
-         th:if="${esAdmin or esRectoria or esDocente}">
+         th:if="${esAdmin or esRectoria or esDocente or esSecretaria}">
       <div class="card shadow-sm border-0 h-100">
         <div class="card-body d-flex flex-column">
-          <h5 class="card-title">Importación CSV</h5>
-          <p class="text-muted flex-grow-1"
-             th:text="${esDocente} ? 'Carga estudiantes de forma masiva mediante archivo CSV para tu trabajo diario.' : 'Carga estudiantes de forma masiva mediante archivo CSV.'">
-            Carga estudiantes de forma masiva mediante archivo CSV.
+          <h5 class="card-title">Carga masiva CSV</h5>
+          <p class="text-muted flex-grow-1">
+            Importa estudiantes en lote desde un archivo CSV.
           </p>
           <a th:href="@{/estudiantes/subir-csv}" class="btn btn-outline-success btn-sm">
             Subir CSV
@@ -175,28 +163,24 @@
       <div class="card-body">
         <h4 class="mb-3">Panel docente</h4>
         <p class="text-muted">
-          Gestiona estudiantes, carga CSV, crea tus clases y registra asistencia por año, tipo de bachillerato y sección.
+          Puedes administrar estudiantes de tu sección asignada, crear tus clases, tomar asistencia en las clases que tú hayas creado y consultar tus reportes.
         </p>
 
         <div class="d-flex flex-wrap gap-2">
           <a th:href="@{/estudiantes}" class="btn btn-success">
-            Estudiantes
-          </a>
-
-          <a th:href="@{/estudiantes/subir-csv}" class="btn btn-outline-success">
-            Subir CSV
+            Mis estudiantes
           </a>
 
           <a th:href="@{/clases}" class="btn btn-primary">
             Mis clases
           </a>
 
-          <a th:href="@{/clases/crear}" class="btn btn-warning text-dark">
-            Crear clase
+          <a th:href="@{/asistencias}" class="btn btn-danger">
+            Mis asistencias
           </a>
 
-          <a th:href="@{/asistencias}" class="btn btn-outline-secondary">
-            Ver asistencias
+          <a th:href="@{/reportes}" class="btn btn-outline-primary">
+            Mis reportes
           </a>
         </div>
       </div>
@@ -208,7 +192,7 @@
       <div class="card-body">
         <h4 class="mb-3">Panel secretaría</h4>
         <p class="text-muted">
-          Consulta clases, estudiantes, asistencias y reportes para apoyo administrativo.
+          Administra estudiantes y consulta asistencias y reportes generales del sistema.
         </p>
 
         <div class="d-flex flex-wrap gap-2">
@@ -237,7 +221,7 @@
       <div class="card-body">
         <h4 class="mb-3">Panel rectoría</h4>
         <p class="text-muted">
-          Acceso general a estudiantes, clases, asistencias y reportes, sin administración de usuarios.
+          Supervisión general de estudiantes, clases, asistencias y reportes institucionales.
         </p>
 
         <div class="d-flex flex-wrap gap-2">
@@ -256,10 +240,6 @@
           <a th:href="@{/reportes}" class="btn btn-outline-primary">
             Reportes
           </a>
-
-          <a th:href="@{/estudiantes/subir-csv}" class="btn btn-outline-dark">
-            Subir CSV
-          </a>
         </div>
       </div>
     </div>
@@ -270,7 +250,7 @@
       <div class="card-body">
         <h4 class="mb-3">Panel administrador</h4>
         <p class="text-muted">
-          Acceso completo a usuarios, estudiantes, clases, asistencias, reportes e importación masiva.
+          Acceso completo a usuarios, estudiantes, clases, asistencias y reportes del sistema.
         </p>
 
         <div class="d-flex flex-wrap gap-2">
@@ -293,17 +273,13 @@
           <a th:href="@{/reportes}" class="btn btn-outline-primary">
             Reportes
           </a>
-
-          <a th:href="@{/estudiantes/subir-csv}" class="btn btn-outline-dark">
-            Subir CSV
-          </a>
         </div>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script th:if="${esAdmin or esRectoria or esSecretaria}" th:inline="javascript">
+  <script th:inline="javascript">
     const presentes = [[${presentes}]];
     const ausentes = [[${ausentes}]];
     const tarde = [[${tarde}]];

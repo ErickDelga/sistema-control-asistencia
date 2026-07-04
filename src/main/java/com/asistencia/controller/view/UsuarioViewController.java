@@ -1,6 +1,8 @@
 package com.asistencia.controller.view;
 
+import com.asistencia.model.Anio;
 import com.asistencia.model.Rol;
+import com.asistencia.model.TipoBachillerato;
 import com.asistencia.model.Usuario;
 import com.asistencia.services.UsuarioService;
 import org.springframework.stereotype.Controller;
@@ -17,38 +19,35 @@ public class UsuarioViewController {
         this.usuarioService = usuarioService;
     }
 
-    // ===============================
-    // LISTAR USUARIOS
-    // ===============================
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("usuarios", usuarioService.listar());
         return "usuarios/lista";
     }
 
-    // ===============================
-    // FORM CREAR USUARIO
-    // ===============================
     @GetMapping("/crear")
     public String crear(Model model) {
         model.addAttribute("usuario", new Usuario());
-        model.addAttribute("roles", Rol.values());
+        cargarCatalogos(model);
         model.addAttribute("modoEdicion", false);
         return "usuarios/form";
     }
 
-    // ===============================
-    // GUARDAR USUARIO
-    // ===============================
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute Usuario usuario) {
-        usuarioService.guardar(usuario);
-        return "redirect:/usuarios";
+    public String guardar(@ModelAttribute Usuario usuario, Model model) {
+        try {
+            normalizarCampos(usuario);
+            usuarioService.guardar(usuario);
+            return "redirect:/usuarios";
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("usuario", usuario);
+            cargarCatalogos(model);
+            model.addAttribute("modoEdicion", usuario.getId() != null);
+            model.addAttribute("errorFormulario", ex.getMessage());
+            return "usuarios/form";
+        }
     }
 
-    // ===============================
-    // EDITAR USUARIO
-    // ===============================
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id, Model model) {
         Usuario usuario = usuarioService.buscarPorId(id);
@@ -57,22 +56,40 @@ public class UsuarioViewController {
             return "redirect:/usuarios";
         }
 
-        // no mostrar password real en el formulario
         usuario.setPassword("");
 
         model.addAttribute("usuario", usuario);
-        model.addAttribute("roles", Rol.values());
+        cargarCatalogos(model);
         model.addAttribute("modoEdicion", true);
 
         return "usuarios/form";
     }
 
-    // ===============================
-    // ELIMINAR USUARIO
-    // ===============================
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id) {
         usuarioService.eliminar(id);
         return "redirect:/usuarios";
+    }
+
+    private void cargarCatalogos(Model model) {
+        model.addAttribute("roles", Rol.values());
+        model.addAttribute("anios", Anio.values());
+        model.addAttribute("tiposBachillerato", TipoBachillerato.values());
+    }
+
+    private void normalizarCampos(Usuario usuario) {
+        if (usuario.getUsername() != null) {
+            usuario.setUsername(usuario.getUsername().trim().toLowerCase());
+        }
+
+        if (usuario.getSeccionAsignada() != null) {
+            usuario.setSeccionAsignada(usuario.getSeccionAsignada().trim().toUpperCase());
+        }
+
+        if (usuario.getRol() != Rol.DOCENTE) {
+            usuario.setAnioAsignado(null);
+            usuario.setTipoBachilleratoAsignado(null);
+            usuario.setSeccionAsignada(null);
+        }
     }
 }

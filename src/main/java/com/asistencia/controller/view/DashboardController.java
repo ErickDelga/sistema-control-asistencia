@@ -49,31 +49,14 @@ public class DashboardController {
     }
 
     private void cargarDatosDashboard(Authentication auth, Model model) {
-        String username = auth != null ? auth.getName() : "Usuario";
+        String username = (auth != null && auth.isAuthenticated()) ? auth.getName() : "Usuario";
 
-        boolean esAdmin = auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean esAdmin = tieneRol(auth, "ROLE_ADMIN");
+        boolean esRectoria = tieneRol(auth, "ROLE_RECTORIA");
+        boolean esDocente = tieneRol(auth, "ROLE_DOCENTE");
+        boolean esSecretaria = tieneRol(auth, "ROLE_SECRETARIA");
 
-        boolean esRectoria = auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_RECTORIA"));
-
-        boolean esDocente = auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_DOCENTE"));
-
-        boolean esSecretaria = auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_SECRETARIA"));
-
-        String rolNombre = "Usuario";
-
-        if (esAdmin) {
-            rolNombre = "Administrador";
-        } else if (esRectoria) {
-            rolNombre = "Rectoría";
-        } else if (esDocente) {
-            rolNombre = "Docente";
-        } else if (esSecretaria) {
-            rolNombre = "Secretaría";
-        }
+        String rolNombre = obtenerNombreRol(esAdmin, esRectoria, esDocente, esSecretaria);
 
         LocalDate hoy = LocalDate.now();
 
@@ -84,6 +67,7 @@ public class DashboardController {
 
         model.addAttribute("username", username);
         model.addAttribute("rolNombre", rolNombre);
+
         model.addAttribute("esAdmin", esAdmin);
         model.addAttribute("esRectoria", esRectoria);
         model.addAttribute("esDocente", esDocente);
@@ -94,5 +78,30 @@ public class DashboardController {
         model.addAttribute("ausentes", ausentes);
         model.addAttribute("tarde", tarde);
         model.addAttribute("totalHoy", totalHoy);
+    }
+
+    private String obtenerNombreRol(boolean esAdmin,
+                                    boolean esRectoria,
+                                    boolean esDocente,
+                                    boolean esSecretaria) {
+        if (esAdmin) {
+            return "Administrador";
+        }
+        if (esRectoria) {
+            return "Rectoría";
+        }
+        if (esDocente) {
+            return "Docente";
+        }
+        if (esSecretaria) {
+            return "Secretaría";
+        }
+        return "Usuario";
+    }
+
+    private boolean tieneRol(Authentication auth, String rol) {
+        return auth != null
+                && auth.getAuthorities() != null
+                && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(rol));
     }
 }

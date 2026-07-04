@@ -4,13 +4,13 @@
 
 <div th:fragment="contenido" class="py-4">
 
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="page-header">
     <div>
-      <h2 class="mb-1"
+      <h2 class="page-title"
           th:text="${estudiante.id != null} ? 'Editar estudiante' : 'Registrar estudiante'">
         Registrar estudiante
       </h2>
-      <p class="text-muted mb-0">
+      <p class="page-subtitle">
         Completa la información del estudiante.
       </p>
     </div>
@@ -21,7 +21,7 @@
   </div>
 
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-8">
+    <div class="col-12 col-lg-9">
 
       <div class="card shadow-sm border-0">
         <div class="card-body">
@@ -33,17 +33,32 @@
 
             <input type="hidden" th:field="*{id}">
             <input type="hidden" th:field="*{foto}">
-
-            <div class="mb-3">
-              <label class="form-label">Nombre completo</label>
-              <input type="text"
-                     class="form-control"
-                     th:field="*{nombreCompleto}"
-                     placeholder="Ejemplo: José Antonio Hernández López"
-                     required>
-            </div>
+            <input type="hidden" th:field="*{activo}">
+            <input type="hidden" th:field="*{excluidoInactivacionAutomatica}">
+            <input type="hidden" th:field="*{fechaCambioEstado}">
+            <input type="hidden" th:field="*{motivoCambioEstado}">
 
             <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombres</label>
+                <input type="text"
+                       class="form-control"
+                       th:field="*{nombres}"
+                       placeholder="Ejemplo: José Antonio"
+                       required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Apellidos</label>
+                <input type="text"
+                       class="form-control"
+                       th:field="*{apellidos}"
+                       placeholder="Ejemplo: Hernández López"
+                       required>
+              </div>
+            </div>
+
+            <div class="row g-3 mt-1">
               <div class="col-md-4">
                 <label class="form-label">Año</label>
                 <select class="form-select" th:field="*{anio}" required>
@@ -54,19 +69,18 @@
                 </select>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-5">
                 <label class="form-label">Tipo Bachillerato</label>
                 <select class="form-select" th:field="*{tipoBachillerato}" required>
                   <option value="">Seleccione un tipo</option>
-                  <option value="GENERAL">GENERAL</option>
-                  <option value="TECNICO">TECNICO</option>
-                  <option value="CONTADOR">CONTADOR</option>
-                  <option value="SALUD">SALUD</option>
-                  <option value="SOFTWARE">SOFTWARE</option>
+                  <option value="BACHILLERATO_GENERAL">Bachillerato General</option>
+                  <option value="TECNICO_PRODUCTIVO_EN_SALUD_Y_BIENESTAR_SOCIAL">Técnico Productivo en Salud y Bienestar Social</option>
+                  <option value="ADMINISTRATIVO_CONTABLE">Administrativo Contable</option>
+                  <option value="INFRAESTRUCTURA_TECNOLOGICA_Y_SERVICIOS_INFORMATICOS">Infraestructura Tecnológica y Servicios Informáticos</option>
                 </select>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <label class="form-label">Sección</label>
                 <input type="text"
                        class="form-control"
@@ -84,9 +98,8 @@
                      name="fotoFile"
                      class="form-control"
                      accept="image/*">
-
               <div class="form-text">
-                Este campo es opcional. Si no subes una foto, el estudiante se registrará normalmente.
+                Formatos recomendados: JPG, PNG o WEBP. Tamaño máximo: 5 MB.
               </div>
             </div>
 
@@ -101,17 +114,13 @@
             </div>
 
             <div class="alert alert-info mt-4 mb-4">
-              Usa el nombre completo del estudiante y selecciona correctamente su año, tipo de bachillerato y sección.
+              Verifica correctamente nombres, apellidos, año, tipo de bachillerato y sección antes de guardar.
             </div>
 
             <div class="d-flex flex-wrap gap-2">
-              <button type="submit" class="btn btn-success">
+              <button type="submit" class="btn btn-primary">
                 Guardar estudiante
               </button>
-
-              <a th:href="@{/estudiantes}" class="btn btn-outline-secondary">
-                Cancelar
-              </a>
             </div>
 
           </form>
@@ -121,6 +130,18 @@
 
     </div>
   </div>
+
+  <script>
+    (function () {
+      const seccionInput = document.querySelector('[name="seccion"]');
+
+      if (seccionInput) {
+        seccionInput.addEventListener('input', function () {
+          this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 1);
+        });
+      }
+    })();
+  </script>
 
 </div>
 

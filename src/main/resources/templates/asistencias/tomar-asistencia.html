@@ -14,7 +14,7 @@
             <p class="text-muted mb-0">
                 <strong>Sección:</strong>
                 <span th:text="${clase.anio}">Año</span> -
-                <span th:text="${clase.tipoBachillerato}">Tipo</span> -
+                <span th:text="${clase.tipoBachillerato != null ? clase.tipoBachillerato.nombreVisible : ''}">Tipo</span> -
                 <span th:text="${clase.seccion}">Sección</span>
             </p>
         </div>
@@ -23,6 +23,12 @@
             <a th:href="@{/clases}" class="btn btn-outline-secondary">
                 Volver a clases
             </a>
+            <button type="button"
+                    class="btn btn-primary"
+                    id="btnAbrirModal"
+                    th:if="${!#lists.isEmpty(estudiantes)}">
+                Iniciar toma interactiva
+            </button>
             <a th:href="@{/asistencias}" class="btn btn-outline-dark">
                 Ver asistencias
             </a>
@@ -57,11 +63,22 @@
                             <th style="min-width: 110px;">Año</th>
                             <th style="min-width: 170px;">Tipo</th>
                             <th style="min-width: 100px;">Sección</th>
-                            <th style="min-width: 280px;" class="text-center">Asistencia</th>
+                            <th style="min-width: 160px;" class="text-center">Estado actual</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="est : ${estudiantes}">
+                        <tr th:each="est : ${estudiantes}"
+                            data-estudiante="true"
+                            th:attr="data-id=${est.id},
+                                     data-nombre=${est.nombreCompleto},
+                                     data-anio=${est.anio},
+                                     data-tipo=${est.tipoBachillerato != null ? est.tipoBachillerato.nombreVisible : ''},
+                                     data-seccion=${est.seccion},
+                                     data-asignatura=${clase.asignatura},
+                                     data-clase-id=${clase.id},
+                                     data-foto=${est.foto != null and !#strings.isEmpty(est.foto) ? '/uploads/' + est.foto : ''},
+                                     data-bloqueado=${bloqueos != null and bloqueos.containsKey(est.id) ? 'true' : 'false'},
+                                     data-minutos=${bloqueos != null and bloqueos.containsKey(est.id) ? bloqueos.get(est.id) : 0}">
                             <td th:text="${est.id}">1</td>
 
                             <td class="text-center">
@@ -79,43 +96,18 @@
 
                             <td th:text="${est.nombreCompleto}">Nombre completo</td>
                             <td th:text="${est.anio}">Año</td>
-                            <td th:text="${est.tipoBachillerato}">Tipo</td>
+                            <td th:text="${est.tipoBachillerato != null ? est.tipoBachillerato.nombreVisible : ''}">Tipo</td>
                             <td th:text="${est.seccion}">A</td>
 
                             <td class="text-center">
-                                <div class="d-flex flex-wrap justify-content-center gap-2">
-
-                                    <form th:action="@{/asistencias/guardar}" method="post" class="d-inline">
-                                        <input type="hidden" name="estudianteId" th:value="${est.id}">
-                                        <input type="hidden" name="estado" value="PRESENTE">
-                                        <input type="hidden" name="claseId" th:value="${clase.id}">
-                                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                        <button type="submit" class="btn btn-success btn-sm">
-                                            Presente
-                                        </button>
-                                    </form>
-
-                                    <form th:action="@{/asistencias/guardar}" method="post" class="d-inline">
-                                        <input type="hidden" name="estudianteId" th:value="${est.id}">
-                                        <input type="hidden" name="estado" value="AUSENTE">
-                                        <input type="hidden" name="claseId" th:value="${clase.id}">
-                                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                        <button type="submit" class="btn btn-danger btn-sm">
-                                            Ausente
-                                        </button>
-                                    </form>
-
-                                    <form th:action="@{/asistencias/guardar}" method="post" class="d-inline">
-                                        <input type="hidden" name="estudianteId" th:value="${est.id}">
-                                        <input type="hidden" name="estado" value="TARDE">
-                                        <input type="hidden" name="claseId" th:value="${clase.id}">
-                                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                        <button type="submit" class="btn btn-warning btn-sm">
-                                            Tarde
-                                        </button>
-                                    </form>
-
-                                </div>
+                                <span th:if="${bloqueos != null and bloqueos.containsKey(est.id)}"
+                                      class="badge bg-secondary">
+                                    Registrada
+                                </span>
+                                <span th:if="${bloqueos == null or !bloqueos.containsKey(est.id)}"
+                                      class="badge bg-success">
+                                    Disponible
+                                </span>
                             </td>
                         </tr>
                         </tbody>
@@ -125,6 +117,376 @@
 
         </div>
     </div>
+
+    <div class="modal fade" id="modalAsistenciaInteractiva" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-lg-down">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title mb-1">Toma de asistencia interactiva</h5>
+                        <div class="small text-muted">
+                            Estudiante <span id="contadorActual">1</span> de <span id="contadorTotal">0</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="mensajeModal" class="mb-3"></div>
+
+                    <div class="row g-4 align-items-start">
+                        <div class="col-12 col-lg-4 text-center">
+                            <img id="modalFotoEstudiante"
+                                 src=""
+                                 alt="Foto estudiante"
+                                 class="rounded border"
+                                 style="width:220px; height:220px; object-fit:cover; max-width:100%;">
+
+                            <div class="mt-3">
+                                <h4 id="modalNombreEstudiante" class="mb-1">Nombre</h4>
+                                <p class="text-muted mb-0">
+                                    <strong>Año:</strong> <span id="modalAnio"></span><br>
+                                    <strong>Tipo:</strong> <span id="modalTipo"></span><br>
+                                    <strong>Asignatura:</strong> <span id="modalAsignatura"></span><br>
+                                    <strong>Fecha y hora:</strong> <span id="modalFechaHora"></span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-8">
+                            <div id="panelBloqueo" class="alert alert-secondary d-none">
+                                <h5 class="mb-2">Asistencia registrada</h5>
+                                <p class="mb-1">Este estudiante ya tiene una asistencia guardada para esta clase.</p>
+                                <p class="mb-0">
+                                    Se liberará en <strong><span id="bloqueoMinutos">0</span> minuto(s)</strong>.
+                                </p>
+                            </div>
+
+                            <form id="formAsistenciaInteractiva" enctype="multipart/form-data">
+                                <input type="hidden" id="inputEstudianteId" name="estudianteId">
+                                <input type="hidden" id="inputClaseId" name="claseId">
+                                <input type="hidden" id="inputEstado" name="estado">
+
+                                <div id="panelFormulario">
+                                    <label class="form-label fw-semibold">Seleccione el estado</label>
+
+                                    <div class="d-flex flex-wrap gap-2 mb-4">
+                                        <button type="button" class="btn btn-outline-success btn-estado" data-estado="PRESENTE">
+                                            PRESENTE
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-estado" data-estado="AUSENTE">
+                                            AUSENTE
+                                        </button>
+                                        <button type="button" class="btn btn-outline-warning btn-estado" data-estado="TARDE">
+                                            TARDE
+                                        </button>
+                                    </div>
+
+                                    <div id="camposExtra" class="d-none">
+                                        <div class="mb-3">
+                                            <label for="inputMotivo" class="form-label">Motivo (opcional)</label>
+                                            <textarea id="inputMotivo"
+                                                      name="motivo"
+                                                      class="form-control"
+                                                      rows="3"
+                                                      placeholder="Escriba el motivo de la ausencia o llegada tarde"></textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="inputComprobante" class="form-label">Comprobante (opcional)</label>
+                                            <input id="inputComprobante"
+                                                   type="file"
+                                                   name="comprobanteFile"
+                                                   class="form-control"
+                                                   accept=".pdf,image/*">
+                                            <div class="form-text">
+                                                Puede adjuntar un archivo PDF o una imagen.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" id="btnAnterior">
+                        Anterior
+                    </button>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-dark d-none" id="btnSiguienteBloqueado">
+                            Siguiente
+                        </button>
+                        <button type="button" class="btn btn-primary" id="btnGuardarAsistencia">
+                            Guardar asistencia
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const filas = Array.from(document.querySelectorAll('tr[data-estudiante="true"]'));
+            const estudiantes = filas.map(fila => ({
+                id: fila.dataset.id,
+                nombre: fila.dataset.nombre,
+                anio: fila.dataset.anio,
+                tipo: fila.dataset.tipo,
+                seccion: fila.dataset.seccion,
+                asignatura: fila.dataset.asignatura,
+                claseId: fila.dataset.claseId,
+                foto: fila.dataset.foto,
+                bloqueado: fila.dataset.bloqueado === 'true',
+                minutos: parseInt(fila.dataset.minutos || '0', 10)
+            }));
+
+            const modalElement = document.getElementById('modalAsistenciaInteractiva');
+            const btnAbrirModal = document.getElementById('btnAbrirModal');
+
+            if (!modalElement || estudiantes.length === 0) {
+                return;
+            }
+
+            const modal = new bootstrap.Modal(modalElement);
+
+            const contadorActual = document.getElementById('contadorActual');
+            const contadorTotal = document.getElementById('contadorTotal');
+            const modalFotoEstudiante = document.getElementById('modalFotoEstudiante');
+            const modalNombreEstudiante = document.getElementById('modalNombreEstudiante');
+            const modalAnio = document.getElementById('modalAnio');
+            const modalTipo = document.getElementById('modalTipo');
+            const modalAsignatura = document.getElementById('modalAsignatura');
+            const modalFechaHora = document.getElementById('modalFechaHora');
+            const mensajeModal = document.getElementById('mensajeModal');
+
+            const panelBloqueo = document.getElementById('panelBloqueo');
+            const bloqueoMinutos = document.getElementById('bloqueoMinutos');
+
+            const panelFormulario = document.getElementById('panelFormulario');
+            const inputEstudianteId = document.getElementById('inputEstudianteId');
+            const inputClaseId = document.getElementById('inputClaseId');
+            const inputEstado = document.getElementById('inputEstado');
+            const inputMotivo = document.getElementById('inputMotivo');
+            const inputComprobante = document.getElementById('inputComprobante');
+            const camposExtra = document.getElementById('camposExtra');
+
+            const btnEstado = document.querySelectorAll('.btn-estado');
+            const btnGuardarAsistencia = document.getElementById('btnGuardarAsistencia');
+            const btnSiguienteBloqueado = document.getElementById('btnSiguienteBloqueado');
+            const btnAnterior = document.getElementById('btnAnterior');
+
+            let indiceActual = 0;
+
+            contadorTotal.textContent = estudiantes.length;
+
+            function formatearFechaHoraActual() {
+                const ahora = new Date();
+                return ahora.toLocaleString('es-SV', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            function limpiarMensaje() {
+                mensajeModal.innerHTML = '';
+            }
+
+            function mostrarMensaje(tipo, texto) {
+                mensajeModal.innerHTML = `<div class="alert alert-${tipo} mb-0">${texto}</div>`;
+            }
+
+            function resetSeleccionEstado() {
+                inputEstado.value = '';
+                btnEstado.forEach(btn => {
+                    btn.classList.remove('active', 'text-white');
+                    btn.classList.remove('btn-success', 'btn-danger', 'btn-warning');
+                    btn.classList.remove('btn-outline-success', 'btn-outline-danger', 'btn-outline-warning');
+
+                    if (btn.dataset.estado === 'PRESENTE') btn.classList.add('btn-outline-success');
+                    if (btn.dataset.estado === 'AUSENTE') btn.classList.add('btn-outline-danger');
+                    if (btn.dataset.estado === 'TARDE') btn.classList.add('btn-outline-warning');
+                });
+                camposExtra.classList.add('d-none');
+                inputMotivo.value = '';
+                inputComprobante.value = '';
+            }
+
+            function aplicarEstadoSeleccionado(estado) {
+                inputEstado.value = estado;
+
+                btnEstado.forEach(btn => {
+                    btn.classList.remove('active', 'text-white', 'btn-success', 'btn-danger', 'btn-warning');
+                    btn.classList.remove('btn-outline-success', 'btn-outline-danger', 'btn-outline-warning');
+
+                    if (btn.dataset.estado === 'PRESENTE') btn.classList.add('btn-outline-success');
+                    if (btn.dataset.estado === 'AUSENTE') btn.classList.add('btn-outline-danger');
+                    if (btn.dataset.estado === 'TARDE') btn.classList.add('btn-outline-warning');
+
+                    if (btn.dataset.estado === estado) {
+                        btn.classList.add('active', 'text-white');
+                        if (estado === 'PRESENTE') btn.classList.add('btn-success');
+                        if (estado === 'AUSENTE') btn.classList.add('btn-danger');
+                        if (estado === 'TARDE') btn.classList.add('btn-warning');
+                    }
+                });
+
+                if (estado === 'AUSENTE' || estado === 'TARDE') {
+                    camposExtra.classList.remove('d-none');
+                } else {
+                    camposExtra.classList.add('d-none');
+                    inputMotivo.value = '';
+                    inputComprobante.value = '';
+                }
+            }
+
+            function actualizarBotonesNavegacion() {
+                btnAnterior.disabled = indiceActual === 0;
+
+                const esUltimo = indiceActual === estudiantes.length - 1;
+                btnSiguienteBloqueado.textContent = esUltimo ? 'Finalizar' : 'Siguiente';
+                btnGuardarAsistencia.textContent = esUltimo ? 'Guardar y finalizar' : 'Guardar asistencia';
+            }
+
+            function cargarEstudiante(indice) {
+                indiceActual = indice;
+                limpiarMensaje();
+                resetSeleccionEstado();
+                actualizarBotonesNavegacion();
+
+                const estudiante = estudiantes[indiceActual];
+
+                contadorActual.textContent = indiceActual + 1;
+
+                modalFotoEstudiante.src = estudiante.foto && estudiante.foto.trim() !== ''
+                    ? estudiante.foto
+                    : 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220">
+                            <rect width="100%" height="100%" fill="#f1f3f5"/>
+                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#6c757d" font-size="20">
+                                Sin foto
+                            </text>
+                        </svg>
+                    `);
+
+                modalNombreEstudiante.textContent = estudiante.nombre;
+                modalAnio.textContent = estudiante.anio;
+                modalTipo.textContent = estudiante.tipo;
+                modalAsignatura.textContent = estudiante.asignatura;
+                modalFechaHora.textContent = formatearFechaHoraActual();
+
+                inputEstudianteId.value = estudiante.id;
+                inputClaseId.value = estudiante.claseId;
+
+                if (estudiante.bloqueado && estudiante.minutos > 0) {
+                    panelBloqueo.classList.remove('d-none');
+                    panelFormulario.classList.add('d-none');
+                    btnGuardarAsistencia.classList.add('d-none');
+                    btnSiguienteBloqueado.classList.remove('d-none');
+                    bloqueoMinutos.textContent = estudiante.minutos;
+                } else {
+                    panelBloqueo.classList.add('d-none');
+                    panelFormulario.classList.remove('d-none');
+                    btnGuardarAsistencia.classList.remove('d-none');
+                    btnSiguienteBloqueado.classList.add('d-none');
+                }
+            }
+
+            function siguienteEstudiante() {
+                if (indiceActual < estudiantes.length - 1) {
+                    cargarEstudiante(indiceActual + 1);
+                } else {
+                    modal.hide();
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('autoModal');
+                    window.location.href = url.toString();
+                }
+            }
+
+            btnEstado.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    aplicarEstadoSeleccionado(this.dataset.estado);
+                });
+            });
+
+            btnGuardarAsistencia.addEventListener('click', async function () {
+                if (!inputEstado.value) {
+                    mostrarMensaje('warning', 'Debes seleccionar un estado de asistencia.');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('estudianteId', inputEstudianteId.value);
+                formData.append('claseId', inputClaseId.value);
+                formData.append('estado', inputEstado.value);
+                formData.append('motivo', inputMotivo.value || '');
+
+                if (inputComprobante.files.length > 0) {
+                    formData.append('comprobanteFile', inputComprobante.files[0]);
+                }
+
+                btnGuardarAsistencia.disabled = true;
+
+                try {
+                    const response = await fetch('/asistencias/guardar-ajax', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        mostrarMensaje('danger', data.message || 'No se pudo registrar la asistencia.');
+                        return;
+                    }
+
+                    mostrarMensaje('success', data.message || 'Asistencia registrada correctamente.');
+
+                    estudiantes[indiceActual].bloqueado = true;
+                    estudiantes[indiceActual].minutos = data.minutosBloqueo || 60;
+
+                    setTimeout(() => {
+                        siguienteEstudiante();
+                    }, 700);
+
+                } catch (error) {
+                    mostrarMensaje('danger', 'Ocurrió un error al guardar la asistencia.');
+                } finally {
+                    btnGuardarAsistencia.disabled = false;
+                }
+            });
+
+            btnSiguienteBloqueado.addEventListener('click', function () {
+                siguienteEstudiante();
+            });
+
+            btnAnterior.addEventListener('click', function () {
+                if (indiceActual > 0) {
+                    cargarEstudiante(indiceActual - 1);
+                }
+            });
+
+            if (btnAbrirModal) {
+                btnAbrirModal.addEventListener('click', function () {
+                    cargarEstudiante(0);
+                    modal.show();
+                });
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('autoModal') === 'true' && estudiantes.length > 0) {
+                cargarEstudiante(0);
+                modal.show();
+            }
+        });
+    </script>
+
 </div>
 
 </html>

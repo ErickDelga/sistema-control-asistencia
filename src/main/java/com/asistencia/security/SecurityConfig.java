@@ -27,9 +27,7 @@ public class SecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authProvider() {
-        DaoAuthenticationProvider provider =
-                new DaoAuthenticationProvider(customUserDetailsService);
-
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(customUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -43,30 +41,41 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(auth -> auth
 
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/uploads/**")
-                .permitAll()
+                .requestMatchers(
+                        "/login",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/uploads/**",
+                        "/favicon.ico"
+                ).permitAll()
 
                 .requestMatchers(
-                        "/", "/home",
-                        "/dashboard", "/dashboard/**",
+                        "/",
+                        "/home",
+                        "/dashboard",
+                        "/dashboard/**",
                         "/admin/dashboard",
                         "/rectoria/dashboard",
                         "/docente/dashboard",
                         "/secretaria/dashboard"
                 ).hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
 
+                // USUARIOS
                 .requestMatchers("/usuarios/**")
                 .hasRole("ADMIN")
 
+                // ESTUDIANTES
                 .requestMatchers(HttpMethod.GET, "/estudiantes/**")
                 .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
                 .requestMatchers(HttpMethod.POST, "/estudiantes/**")
-                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE")
+                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
                 .requestMatchers(HttpMethod.PUT, "/estudiantes/**")
-                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE")
+                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
                 .requestMatchers(HttpMethod.DELETE, "/estudiantes/**")
-                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE")
+                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
 
+                // CLASES
                 .requestMatchers(HttpMethod.GET, "/clases/**")
                 .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
                 .requestMatchers(HttpMethod.POST, "/clases/guardar")
@@ -76,28 +85,33 @@ public class SecurityConfig {
                 .requestMatchers("/clases/editar/**", "/clases/eliminar/**")
                 .hasAnyRole("ADMIN", "RECTORIA")
 
-                .requestMatchers(HttpMethod.GET, "/asistencia/**", "/asistencias/**")
+                // ASISTENCIAS
+                .requestMatchers(HttpMethod.GET, "/asistencias/**", "/asistencia/**")
                 .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
-                .requestMatchers(HttpMethod.POST, "/asistencia/**", "/asistencias/**")
+                .requestMatchers(HttpMethod.POST, "/asistencias/**", "/asistencia/**")
                 .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE")
 
+                // REPORTES
                 .requestMatchers(HttpMethod.GET, "/reportes/**")
-                .hasAnyRole("ADMIN", "RECTORIA", "SECRETARIA")
+                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
 
+                // API ESTUDIANTES
                 .requestMatchers(HttpMethod.GET, "/api/estudiantes/**")
                 .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
                 .requestMatchers(HttpMethod.POST, "/api/estudiantes/**")
-                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE")
+                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
                 .requestMatchers(HttpMethod.PUT, "/api/estudiantes/**")
-                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE")
+                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
                 .requestMatchers(HttpMethod.DELETE, "/api/estudiantes/**")
-                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE")
+                .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
 
+                // API CLASES
                 .requestMatchers(HttpMethod.GET, "/api/clases/**")
                 .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
                 .requestMatchers(HttpMethod.POST, "/api/clases/**")
                 .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE")
 
+                // API ASISTENCIAS
                 .requestMatchers(HttpMethod.GET, "/api/asistencias/**")
                 .hasAnyRole("ADMIN", "RECTORIA", "DOCENTE", "SECRETARIA")
                 .requestMatchers(HttpMethod.POST, "/api/asistencias/**")

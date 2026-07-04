@@ -4,19 +4,21 @@
 
 <div th:fragment="contenido" class="py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="page-header">
         <div>
-            <h2 class="mb-1">Clases</h2>
-            <p class="text-muted mb-0">
+            <h2 class="page-title">Clases</h2>
+            <p class="page-subtitle"
+               th:text="${esDocente} ? 'Listado de clases creadas por ti.' : 'Listado de clases registradas en el sistema.'">
                 Listado de clases registradas en el sistema.
             </p>
         </div>
 
-        <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'')')}"
-           th:href="@{/clases/crear}"
-           class="btn btn-primary">
-            Nueva clase
-        </a>
+        <div class="btn-toolbar-main"
+             th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'')')}">
+            <a th:href="@{/clases/crear}" class="btn btn-primary">
+                Nueva clase
+            </a>
+        </div>
     </div>
 
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
@@ -25,8 +27,8 @@
     <div class="card shadow-sm border-0">
         <div class="card-body">
 
-            <div th:if="${#lists.isEmpty(clases)}" class="alert alert-warning mb-0">
-                No hay clases registradas.
+            <div th:if="${#lists.isEmpty(clases)}" class="empty-state">
+                <strong>No hay clases registradas.</strong>
             </div>
 
             <div th:unless="${#lists.isEmpty(clases)}" class="table-responsive">
@@ -40,7 +42,7 @@
                         <th>Sección</th>
                         <th>Docente</th>
                         <th>Fecha creación</th>
-                        <th class="text-center">Acciones</th>
+                        <th class="text-center">Acción</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -48,7 +50,9 @@
                         <td th:text="${c.id}">1</td>
                         <td th:text="${c.asignatura}">Matemática</td>
                         <td th:text="${c.anio}">PRIMERO</td>
-                        <td th:text="${c.tipoBachillerato}">GENERAL</td>
+                        <td th:text="${c.tipoBachillerato != null ? c.tipoBachillerato.nombreVisible : ''}">
+                            Bachillerato General
+                        </td>
                         <td th:text="${c.seccion}">A</td>
                         <td th:text="${c.docente != null ? c.docente.nombreCompleto : 'Sin docente'}">Docente</td>
                         <td th:text="${c.fechaCreacion != null ? #temporals.format(c.fechaCreacion, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}">
@@ -56,13 +60,18 @@
                         </td>
 
                         <td class="text-center">
-                            <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <div class="actions-inline">
 
-                                <a th:href="@{/clases/{id}/asistencias(id=${c.id})}"
+                                <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'')')}"
+                                   th:href="@{/clases/{id}/asistencias(id=${c.id}, autoModal=true)}"
                                    class="btn btn-success btn-sm">
-                                    <span th:text="${#authorization.expression('hasRole(''SECRETARIA'')') ? 'Ver asistencia' : 'Tomar asistencia'}">
-                                        Tomar asistencia
-                                    </span>
+                                    Tomar asistencia
+                                </a>
+
+                                <a th:if="${#authorization.expression('hasRole(''SECRETARIA'')')}"
+                                   th:href="@{/clases/{id}/asistencias(id=${c.id})}"
+                                   class="btn btn-outline-secondary btn-sm">
+                                    Ver asistencia
                                 </a>
 
                                 <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'')')}"

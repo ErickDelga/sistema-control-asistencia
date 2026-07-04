@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class ClaseService {
@@ -31,24 +29,24 @@ public class ClaseService {
         Authentication auth = obtenerAutenticacionValida();
         Usuario usuarioActual = usuarioService.buscarPorUsername(auth.getName());
 
-        boolean esAdminORectoria = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
-                        || a.getAuthority().equals("ROLE_RECTORIA"));
-
-        if (esAdminORectoria) {
+        if (esAdminORectoria(usuarioActual)) {
             if (clase.getDocente() == null || clase.getDocente().getId() == null) {
-                throw new RuntimeException("Debes seleccionar un docente");
+                throw new IllegalArgumentException("Debes seleccionar un docente");
             }
 
             Usuario docente = usuarioService.buscarPorId(clase.getDocente().getId());
 
             if (docente == null || docente.getRol() != Rol.DOCENTE) {
-                throw new RuntimeException("El usuario seleccionado no es un docente válido");
+                throw new IllegalArgumentException("El usuario seleccionado no es un docente válido");
             }
 
             clase.setDocente(docente);
-        } else {
+
+        } else if (esDocente(usuarioActual)) {
             clase.setDocente(usuarioActual);
+
+        } else {
+            throw new IllegalArgumentException("No tienes permisos para crear clases");
         }
 
         normalizarClase(clase);
@@ -59,17 +57,14 @@ public class ClaseService {
 
     public Clase actualizarClase(Clase datos) {
         Authentication auth = obtenerAutenticacionValida();
+        Usuario usuarioActual = usuarioService.buscarPorUsername(auth.getName());
 
-        boolean esAdminORectoria = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
-                        || a.getAuthority().equals("ROLE_RECTORIA"));
-
-        if (!esAdminORectoria) {
-            throw new RuntimeException("No tienes permisos para editar clases");
+        if (!esAdminORectoria(usuarioActual)) {
+            throw new IllegalArgumentException("No tienes permisos para editar clases");
         }
 
         Clase clase = repo.findById(datos.getId())
-                .orElseThrow(() -> new RuntimeException("Clase no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Clase no encontrada"));
 
         clase.setAsignatura(datos.getAsignatura());
         clase.setAnio(datos.getAnio());
@@ -77,13 +72,13 @@ public class ClaseService {
         clase.setSeccion(datos.getSeccion());
 
         if (datos.getDocente() == null || datos.getDocente().getId() == null) {
-            throw new RuntimeException("Debes seleccionar un docente");
+            throw new IllegalArgumentException("Debes seleccionar un docente");
         }
 
         Usuario docente = usuarioService.buscarPorId(datos.getDocente().getId());
 
         if (docente == null || docente.getRol() != Rol.DOCENTE) {
-            throw new RuntimeException("El usuario seleccionado no es un docente válido");
+            throw new IllegalArgumentException("El usuario seleccionado no es un docente válido");
         }
 
         clase.setDocente(docente);
@@ -94,6 +89,9 @@ public class ClaseService {
     }
 
     public void eliminarClase(Long id) {
+        if (!repo.existsById(id)) {
+            throw new IllegalArgumentException("La clase no existe");
+        }
         repo.deleteById(id);
     }
 
@@ -102,61 +100,102 @@ public class ClaseService {
     }
 
     public List<Clase> listarParaUsuarioActual() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuarioActual = obtenerUsuarioActual();
 
-        if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+        if (usuarioActual == null) {
             return Collections.emptyList();
         }
 
-        String username = auth.getName();
-
-        boolean veTodas = auth.getAuthorities().stream()
-                .map(a -> a.getAuthority())
-                .anyMatch(role ->
-                        role.equals("ROLE_ADMIN")
-                                || role.equals("ROLE_RECTORIA")
-                                || role.equals("ROLE_SECRETARIA"));
-
-        if (veTodas) {
+        if (esAdminORectoria(usuarioActual) || esSecretaria(usuarioActual)) {
             return repo.findAll();
         }
 
-        return repo.findAll().stream()
-                .filter(clase -> clase.getDocente() != null)
-                .filter(clase -> Objects.equals(clase.getDocente().getUsername(), username))
-                .collect(Collectors.toList());
+        if (esDocente(usuarioActual)) {
+            return repo.findByDocenteId(usuarioActual.getId());
+        }
+
+        return Collections.emptyList();
     }
 
     public Clase buscarPorId(Long id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Clase no encontrada"));
+        Usuario usuarioActual = obtenerUsuarioActual();
+
+        Clase clase = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Clase no encontrada"));
+
+        if (usuarioActual == null) {
+            throw new IllegalArgumentException("Usuario no autenticado");
+        }
+
+        if (esAdminORectoria(usuarioActual) || esSecretaria(usuarioActual)) {
+            return clase;
+        }
+
+        if (esDocente(usuarioActual)) {
+            if (clase.getDocente() == null
+                    || clase.getDocente().getId() == null
+                    || !clase.getDocente().getId().equals(usuarioActual.getId())) {
+                throw new IllegalArgumentException("No tienes permisos para acceder a esta clase");
+            }
+            return clase;
+        }
+
+        throw new IllegalArgumentException("No tienes permisos para acceder a esta clase");
     }
 
     private Authentication obtenerAutenticacionValida() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-            throw new RuntimeException("Usuario no autenticado");
+            throw new IllegalArgumentException("Usuario no autenticado");
         }
 
         return auth;
     }
 
+    private Usuario obtenerUsuarioActual() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+            return null;
+        }
+
+        return usuarioService.buscarPorUsername(auth.getName());
+    }
+
+    private boolean esAdminORectoria(Usuario usuario) {
+        return usuario != null
+                && usuario.getRol() != null
+                && (usuario.getRol() == Rol.ADMIN || usuario.getRol() == Rol.RECTORIA);
+    }
+
+    private boolean esDocente(Usuario usuario) {
+        return usuario != null
+                && usuario.getRol() != null
+                && usuario.getRol() == Rol.DOCENTE;
+    }
+
+    private boolean esSecretaria(Usuario usuario) {
+        return usuario != null
+                && usuario.getRol() != null
+                && usuario.getRol() == Rol.SECRETARIA;
+    }
+
     private void normalizarClase(Clase clase) {
         if (clase.getAsignatura() == null || clase.getAsignatura().isBlank()) {
-            throw new RuntimeException("La asignatura es obligatoria");
+            throw new IllegalArgumentException("La asignatura es obligatoria");
         }
 
         if (clase.getAnio() == null) {
-            throw new RuntimeException("El año es obligatorio");
+            throw new IllegalArgumentException("El año es obligatorio");
         }
 
         if (clase.getTipoBachillerato() == null) {
-            throw new RuntimeException("El tipo de bachillerato es obligatorio");
+            throw new IllegalArgumentException("El tipo de bachillerato es obligatorio");
         }
 
         if (clase.getSeccion() == null || clase.getSeccion().isBlank()) {
-            throw new RuntimeException("La sección es obligatoria");
+            throw new IllegalArgumentException("La sección es obligatoria");
         }
 
         clase.setAsignatura(clase.getAsignatura().trim().replaceAll("\\s+", " "));

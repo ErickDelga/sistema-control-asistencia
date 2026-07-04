@@ -4,36 +4,49 @@
 
 <div th:fragment="contenido" class="py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="page-header">
         <div>
-            <h2 class="mb-1">Registro de asistencias</h2>
-            <p class="text-muted mb-0">
+            <h2 class="page-title">Registro de asistencias</h2>
+            <p class="page-subtitle">
                 Consulta general de asistencias registradas.
             </p>
+        </div>
+
+        <div class="btn-toolbar-main">
+            <a th:href="@{/reportes}" class="btn btn-outline-primary">Ir a reportes</a>
         </div>
     </div>
 
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            <form th:action="@{/asistencias}" method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Filtrar por fecha</label>
-                    <input type="date"
-                           name="fecha"
-                           class="form-control"
-                           th:value="${fechaSeleccionada}">
+            <form th:action="@{/asistencias}" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Fecha inicio</label>
+                    <input type="date" name="fechaInicio" class="form-control" th:value="${fechaInicio}">
                 </div>
 
-                <div class="col-md-auto">
-                    <button type="submit" class="btn btn-primary">
-                        Filtrar
-                    </button>
+                <div class="col-md-3">
+                    <label class="form-label">Fecha fin</label>
+                    <input type="date" name="fechaFin" class="form-control" th:value="${fechaFin}">
                 </div>
 
-                <div class="col-md-auto">
-                    <a th:href="@{/asistencias}" class="btn btn-outline-secondary">
-                        Limpiar
-                    </a>
+                <div class="col-md-3">
+                    <label class="form-label">Nombres</label>
+                    <input type="text" name="nombres" class="form-control" th:value="${nombres}" placeholder="Buscar por nombres">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Apellidos</label>
+                    <input type="text" name="apellidos" class="form-control" th:value="${apellidos}" placeholder="Buscar por apellidos">
+                </div>
+
+                <div class="col-12">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" name="periodo" value="HOY" class="btn btn-primary btn-sm">Hoy</button>
+                        <button type="submit" name="periodo" value="SEMANA" class="btn btn-outline-primary btn-sm">Semana</button>
+                        <button type="submit" name="periodo" value="MES" class="btn btn-outline-primary btn-sm">Mes</button>
+                        <a th:href="@{/asistencias}" class="btn btn-outline-secondary btn-sm">Limpiar</a>
+                    </div>
                 </div>
             </form>
         </div>
@@ -42,8 +55,8 @@
     <div class="card shadow-sm border-0">
         <div class="card-body">
 
-            <div th:if="${#lists.isEmpty(asistencias)}" class="alert alert-warning mb-0">
-                No hay asistencias registradas.
+            <div th:if="${#lists.isEmpty(asistencias)}" class="empty-state">
+                <strong>No hay asistencias registradas.</strong>
             </div>
 
             <div th:unless="${#lists.isEmpty(asistencias)}" class="table-responsive">
@@ -52,27 +65,39 @@
                     <tr>
                         <th>ID</th>
                         <th>Fecha y hora</th>
-                        <th>Estudiante</th>
+                        <th>Nombres</th>
+                        <th>Apellidos</th>
                         <th>Asignatura</th>
-                        <th>Año</th>
-                        <th>Tipo Bachillerato</th>
-                        <th>Sección</th>
                         <th>Estado</th>
+                        <th>Motivo</th>
+                        <th>Comprobante</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="a : ${asistencias}">
                         <td th:text="${a.id}">1</td>
                         <td th:text="${#temporals.format(a.fechaHora, 'dd/MM/yyyy HH:mm')}">13/03/2026 08:00</td>
-                        <td th:text="${a.estudiante.nombreCompleto}">Estudiante</td>
+                        <td th:text="${a.estudiante != null ? a.estudiante.nombres : ''}">Juan</td>
+                        <td th:text="${a.estudiante != null ? a.estudiante.apellidos : ''}">Pérez</td>
                         <td th:text="${a.clase != null ? a.clase.asignatura : 'Sin clase'}">Asignatura</td>
-                        <td th:text="${a.estudiante.anio}">Año</td>
-                        <td th:text="${a.estudiante.tipoBachillerato}">Tipo</td>
-                        <td th:text="${a.estudiante.seccion}">A</td>
+
                         <td>
                             <span class="badge bg-success" th:if="${a.estado.name() == 'PRESENTE'}">PRESENTE</span>
                             <span class="badge bg-danger" th:if="${a.estado.name() == 'AUSENTE'}">AUSENTE</span>
                             <span class="badge bg-warning text-dark" th:if="${a.estado.name() == 'TARDE'}">TARDE</span>
+                        </td>
+
+                        <td th:text="${a.motivo != null and !#strings.isEmpty(a.motivo) ? a.motivo : '—'}">Motivo</td>
+
+                        <td>
+                            <a th:if="${a.comprobante != null and !#strings.isEmpty(a.comprobante)}"
+                               th:href="@{'/uploads/' + ${a.comprobante}}"
+                               target="_blank"
+                               class="btn btn-outline-primary btn-sm">
+                                Ver archivo
+                            </a>
+
+                            <span th:if="${a.comprobante == null or #strings.isEmpty(a.comprobante)}">—</span>
                         </td>
                     </tr>
                     </tbody>
@@ -81,6 +106,6 @@
 
         </div>
     </div>
-</div>
 
+</div>
 </html>

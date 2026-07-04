@@ -8,7 +8,7 @@
     <div>
       <h2 class="mb-1">Importar estudiantes desde CSV</h2>
       <p class="text-muted mb-0">
-        Sube un archivo CSV para registrar varios estudiantes de una sola vez.
+        Sube un archivo CSV para registrar o actualizar varios estudiantes de una sola vez.
       </p>
     </div>
 
@@ -30,6 +30,9 @@
                  class="form-control"
                  accept=".csv"
                  required>
+          <div class="form-text">
+            Usa un archivo CSV en formato UTF-8.
+          </div>
         </div>
 
         <div class="d-flex flex-wrap gap-2">
@@ -45,31 +48,58 @@
     </div>
   </div>
 
-  <div class="card shadow-sm border-0">
+  <div class="card shadow-sm border-0 mb-4">
     <div class="card-body">
       <h5 class="mb-3">Formato esperado</h5>
 
       <p class="mb-2">
-        Puedes usar encabezado o no. El orden de columnas debe ser:
+        El archivo debe tener este orden de columnas:
       </p>
 
       <div class="bg-light border rounded p-3 mb-3">
-        <code>nombreCompleto,anio,tipoBachillerato,seccion</code>
+        <code>nombres,apellidos,anio,tipoBachillerato,seccion</code>
       </div>
 
-      <p class="mb-2">Ejemplo con comas:</p>
+      <p class="mb-2">Ejemplo:</p>
       <div class="bg-light border rounded p-3 mb-3">
-<pre class="mb-0">nombreCompleto,anio,tipoBachillerato,seccion
-Juan Pérez,PRIMERO,GENERAL,A
-María López,SEGUNDO,TECNICO,B
-Carlos Hernández,TERCERO,GENERAL,C</pre>
+<pre class="mb-0">nombres,apellidos,anio,tipoBachillerato,seccion
+Juan Carlos,Pérez López,PRIMERO,BACHILLERATO_GENERAL,A
+María Fernanda,Hernández Ruiz,SEGUNDO,ADMINISTRATIVO_CONTABLE,B
+Luis Alfredo,Castro Mejía,TERCERO,INFRAESTRUCTURA_TECNOLOGICA_Y_SERVICIOS_INFORMATICOS,C</pre>
       </div>
 
-      <p class="mb-2">También acepta valores como:</p>
-      <div class="bg-light border rounded p-3">
-        <code>1ro</code>, <code>2do</code>, <code>3ro</code>,
-        <code>Primero</code>, <code>Segundo</code>, <code>Tercero</code>,
-        <code>General</code>, <code>Técnico</code>
+      <div class="alert alert-info mb-0">
+        Si un estudiante ya existe con la misma combinación de nombres, apellidos, año, tipo de bachillerato y sección,
+        el sistema actualizará ese registro en lugar de duplicarlo.
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <h5 class="mb-3">Valores permitidos</h5>
+
+      <div class="row g-4">
+        <div class="col-md-4">
+          <h6>Año</h6>
+          <ul class="mb-0">
+            <li><code>PRIMERO</code></li>
+            <li><code>SEGUNDO</code></li>
+            <li><code>TERCERO</code></li>
+            <li><code>1ro</code>, <code>2do</code>, <code>3ro</code></li>
+            <li><code>1</code>, <code>2</code>, <code>3</code></li>
+          </ul>
+        </div>
+
+        <div class="col-md-8">
+          <h6>Tipo de bachillerato</h6>
+          <ul class="mb-0">
+            <li><code>BACHILLERATO_GENERAL</code> o <code>General</code></li>
+            <li><code>TECNICO_PRODUCTIVO_EN_SALUD_Y_BIENESTAR_SOCIAL</code> o <code>Salud</code></li>
+            <li><code>ADMINISTRATIVO_CONTABLE</code> o <code>Contable</code></li>
+            <li><code>INFRAESTRUCTURA_TECNOLOGICA_Y_SERVICIOS_INFORMATICOS</code> o <code>Informatica</code></li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

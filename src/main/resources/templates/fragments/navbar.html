@@ -1,13 +1,18 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm"
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm"
      xmlns:th="http://www.thymeleaf.org"
-     th:fragment="navbar">
+     th:fragment="navbar"
+     style="background: linear-gradient(90deg, #0f172a 0%, #1e293b 100%);">
 
-    <div class="container-fluid">
-        <a class="navbar-brand fw-semibold" th:href="@{/dashboard}">
-            Sistema Asistencia
+    <div class="container-fluid px-3 px-lg-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" th:href="@{/dashboard}">
+            <span class="d-inline-flex align-items-center justify-content-center rounded-circle"
+                  style="width: 38px; height: 38px; background: rgba(255,255,255,0.12);">
+                📘
+            </span>
+            <span>Sistema Asistencia</span>
         </a>
 
-        <button class="navbar-toggler"
+        <button class="navbar-toggler border-0 shadow-none"
                 type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#menuNavbar"
@@ -17,55 +22,57 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="menuNavbar">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <div class="collapse navbar-collapse pt-3 pt-lg-0" id="menuNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center gap-lg-1">
 
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/dashboard}">Inicio</a>
+                    <a class="nav-link px-3 rounded-pill" th:href="@{/dashboard}">Inicio</a>
                 </li>
 
                 <li class="nav-item"
                     th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
-                    <a class="nav-link" th:href="@{/usuarios}">Usuarios</a>
+                    <a class="nav-link px-3 rounded-pill" th:href="@{/usuarios}">Usuarios</a>
                 </li>
 
                 <li class="nav-item"
                     th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'',''SECRETARIA'')')}">
-                    <a class="nav-link" th:href="@{/estudiantes}">Estudiantes</a>
+                    <a class="nav-link px-3 rounded-pill" th:href="@{/estudiantes}">Estudiantes</a>
                 </li>
 
                 <li class="nav-item"
                     th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'',''SECRETARIA'')')}">
-                    <a class="nav-link" th:href="@{/clases}">Clases</a>
+                    <a class="nav-link px-3 rounded-pill" th:href="@{/clases}">Clases</a>
                 </li>
 
                 <li class="nav-item"
                     th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'',''SECRETARIA'')')}">
-                    <a class="nav-link" th:href="@{/asistencias}">Asistencias</a>
+                    <a class="nav-link px-3 rounded-pill" th:href="@{/asistencias}">Asistencias</a>
                 </li>
 
                 <li class="nav-item"
-                    th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''SECRETARIA'')')}">
-                    <a class="nav-link" th:href="@{/reportes}">Reportes</a>
-                </li>
-
-                <li class="nav-item"
-                    th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'')')}">
-                    <a class="nav-link text-warning fw-semibold" th:href="@{/estudiantes/subir-csv}">
-                        Subir CSV
-                    </a>
+                    th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'',''SECRETARIA'')')}">
+                    <a class="nav-link px-3 rounded-pill" th:href="@{/reportes}">Reportes</a>
                 </li>
             </ul>
 
-            <form th:action="@{/logout}" method="post" class="d-flex">
-                <input type="hidden"
-                       th:if="${_csrf != null}"
-                       th:name="${_csrf.parameterName}"
-                       th:value="${_csrf.token}">
-                <button type="submit" class="btn btn-outline-light">
-                    Cerrar sesión
-                </button>
-            </form>
+            <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 mt-3 mt-lg-0">
+
+                <a class="btn btn-warning fw-semibold"
+                   th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''RECTORIA'',''DOCENTE'',''SECRETARIA'')')}"
+                   th:href="@{/estudiantes/subir-csv}">
+                    Subir CSV
+                </a>
+
+                <form th:action="@{/logout}" method="post" class="d-flex">
+                    <input type="hidden"
+                           th:if="${_csrf != null}"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}">
+                    <button type="submit" class="btn btn-outline-light">
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </nav>
